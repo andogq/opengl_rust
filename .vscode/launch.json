@@ -22,7 +22,7 @@
                     "ignoreFailures": true
                 }
             ],
-            "preLaunchTask": "Rust: cargo build - opengl_rust"
+            "preLaunchTask": "rust: cargo build"
         }
     ]
 }
