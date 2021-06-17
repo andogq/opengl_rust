@@ -1,7 +1,7 @@
 use glutin::event::{Event, WindowEvent};
 use glutin::event_loop::{ControlFlow, EventLoop};
 use glutin::window::WindowBuilder;
-use glutin::ContextBuilder;
+use glutin::{ContextBuilder, PossiblyCurrent};
 
 use std::ffi::CStr;
 
@@ -37,11 +37,14 @@ fn main() {
                 _ => ()
             },
             Event::RedrawRequested(_) => {
-                unsafe { gl::Clear(gl::COLOR_BUFFER_BIT) };
-                context.swap_buffers().unwrap();
+                draw(&context);
             },
             _ => (),
         }
     });
+}
 
+fn draw(context: &glutin::ContextWrapper<PossiblyCurrent, glutin::window::Window>) {
+    unsafe { gl::Clear(gl::COLOR_BUFFER_BIT) };
+    context.swap_buffers().unwrap();
 }
