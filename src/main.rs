@@ -4,7 +4,7 @@ use glutin::event_loop::{ControlFlow, EventLoop};
 use glutin::window::WindowBuilder;
 use glutin::{ContextBuilder, PossiblyCurrent};
 
-use std::ffi::{CStr, CString, c_void};
+use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
 use std::mem;
 
@@ -30,14 +30,16 @@ fn main() {
     unsafe { gl::ClearColor(0.0, 0.0, 0.0, 1.0) };
 
     // Set up the positions
-    let positions: [GLfloat; 6] = [
-         0.0,  0.5,
+    let positions: [GLfloat; 8] = [
+        -0.5,  0.5,
+         0.5,  0.5,
          0.5, -0.5,
         -0.5, -0.5
     ];
 
-    let indexes: [GLuint; 3] = [
-        0, 1, 2
+    let indexes: [GLuint; 6] = [
+        0, 1, 2,
+        2, 3, 0
     ];
 
     let vertex_shader_source = String::from(r#"
@@ -82,7 +84,7 @@ fn main() {
         // Initialise vertex buffer
         gl::GenBuffers(1, &mut vertex_buffer);
         gl::BindBuffer(gl::ARRAY_BUFFER, vertex_buffer);
-        gl::BufferData(gl::ARRAY_BUFFER, (6 * mem::size_of::<GLfloat>()) as GLsizeiptr, mem::transmute(&positions[0]), gl::STATIC_DRAW);
+        gl::BufferData(gl::ARRAY_BUFFER, (positions.len() * mem::size_of::<GLfloat>()) as GLsizeiptr, mem::transmute(&positions[0]), gl::STATIC_DRAW);
 
         // Create a vertex array
         gl::GenVertexArrays(1, &mut vertex_array);
@@ -126,11 +128,11 @@ fn draw(context: &glutin::ContextWrapper<PossiblyCurrent, glutin::window::Window
         gl::Clear(gl::COLOR_BUFFER_BIT);
         
         gl::UseProgram(*program);
-        
+
         gl::BindBuffer(gl::ARRAY_BUFFER, *vertex_buffer);
         gl::BindVertexArray(*vertex_array);
 
-        gl::DrawElements(gl::TRIANGLES, 3, gl::UNSIGNED_INT, std::ptr::null());
+        gl::DrawElements(gl::TRIANGLES, 6, gl::UNSIGNED_INT, std::ptr::null());
     };
 
     context.swap_buffers().unwrap();
