@@ -11,7 +11,7 @@ use std::os::raw::c_char;
 use std::mem;
 
 use std::fs::read_to_string;
-use std::time::Instant;
+use std::time;
 
 const WINDOW_WIDTH: u32 = 640;
 const WINDOW_HEIGHT: u32 = 480;
@@ -24,7 +24,7 @@ fn main() {
     let wb = WindowBuilder::new().with_title("Hello").with_inner_size(glutin::dpi::LogicalSize::new(WINDOW_WIDTH, WINDOW_HEIGHT));
 
     // Load the context
-    let context = ContextBuilder::new().build_windowed(wb, &el).unwrap();
+    let context = ContextBuilder::new().with_vsync(true).build_windowed(wb, &el).unwrap();
     let context = unsafe { context.make_current().unwrap() };
 
     // Load OpenGL function wrapper
@@ -84,12 +84,9 @@ fn main() {
 
     let projection = ortho(0.0, WINDOW_WIDTH as f32, 0.0, WINDOW_HEIGHT as f32, 0.0, 1.0);
     let view = Matrix4::identity();
-    let model = Matrix4::from_scale(100.0);
+    let mut model = Matrix4::from_scale(100.0);
     
     let u_mvp_matrix = program.get_uniform( "u_mvp_matrix");
-
-    let mvp_matrix: [[f32; 4]; 4] = (projection * view * model).into();
-    unsafe { gl::UniformMatrix4fv(u_mvp_matrix, 1, gl::FALSE, mvp_matrix[0].as_ptr()) };
 
     let u_color = program.get_uniform("u_color");
 
@@ -103,10 +100,10 @@ fn main() {
     
     println!("[+] Beginning main loop");
 
+    let mut last_draw: time::Instant = time::Instant::now();
+
     // Run the event loop
     el.run(move |event, _, control_flow| {
-        let start_time = Instant::now();
-
         // Check what type of event has been called
         match event {
             Event::LoopDestroyed => return,
@@ -130,6 +127,11 @@ fn main() {
 
                 unsafe { gl::Uniform4f(u_color, r, g, b, 1.0) };
 
+                model = Matrix4::from_translation(Vector3::new(1.0, 0.0, 0.0)) * model;
+
+                let mvp_matrix: [[f32; 4]; 4] = (projection * view * model).into();
+                unsafe { gl::UniformMatrix4fv(u_mvp_matrix, 1, gl::FALSE, mvp_matrix[0].as_ptr()) };
+
                 unsafe {
                     gl::BindBuffer(gl::ARRAY_BUFFER, vertex_buffer);
                     gl::BindVertexArray(vertex_array);
@@ -140,24 +142,21 @@ fn main() {
                 context.swap_buffers().unwrap();
 
                 check_errors();
+                
+                last_draw = time::Instant::now();
             },
             _ => (),
         }
 
         match *control_flow {
+            // Ensure to actually exit
             ControlFlow::Exit => (),
             _ => {
-                // Redraw
-                context.window().request_redraw();
-
-                // Sleep until next frame should be drawn
-                let elapsed = Instant::now().duration_since(start_time).as_millis() as u32;
-                let wait_time = match 1000 / FPS >= elapsed {
-                    true => { (1000 / FPS) - elapsed },
-                    false => { 0 }
-                };
-
-                *control_flow = ControlFlow::WaitUntil(start_time + std::time::Duration::from_millis(wait_time as u64));
+                // Calculate when next frame should be drawn, and trigger a draw call or wait
+                let next_draw = last_draw + time::Duration::from_millis(1000 / FPS as u64);
+        
+                if next_draw <= time::Instant::now() { context.window().request_redraw(); }
+                else { *control_flow = ControlFlow::WaitUntil(next_draw); }
             }
         }
     });
