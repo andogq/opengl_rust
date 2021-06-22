@@ -10,6 +10,8 @@ use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
 use std::mem;
 
+use std::fs::read_to_string;
+
 const WINDOW_WIDTH: u32 = 640;
 const WINDOW_HEIGHT: u32 = 480;
 
@@ -46,47 +48,13 @@ fn main() {
         0, 1, 2,
         2, 3, 0
     ];
-
-    let vertex_shader_source = String::from(r#"
-        #version 330 core
-        layout(location = 0) in vec4 position;
-
-        uniform mat4 u_mvp_matrix;
-
-        void main() {
-            gl_Position = u_mvp_matrix * position;
-        }"#);
-    let fragment_shader_source = String::from(r#"
-        #version 330 core
-        layout(location = 0) out vec4 color;
-        
-        void main() {
-            color = vec4(1.0, 0.0, 0.0, 1.0);
-        }"#);
-
-    let program;
-    
-    let vertex_shader = Shader::new(ShaderType::Vertex, &vertex_shader_source);
-    let fragment_shader = Shader::new(ShaderType::Fragment, &fragment_shader_source);
     
     let mut vertex_buffer: u32 = 0;
     let mut index_buffer: u32 = 0;
     let mut vertex_array: u32 = 0;
 
-    unsafe {
-        program = gl::CreateProgram();
-
-        gl::AttachShader(program, vertex_shader.id);
-        gl::AttachShader(program, fragment_shader.id);
-        gl::LinkProgram(program);
-        gl::ValidateProgram(program);
-
-        // Probably shouldn't delete them here, since the structs are still in scope
-        gl::DeleteShader(vertex_shader.id);
-        gl::DeleteShader(fragment_shader.id);
-
-        gl::UseProgram(program);
-    };
+    let program = Program::new("basic");
+    program.bind();
     
     unsafe {
         // Initialise vertex buffer
@@ -117,7 +85,7 @@ fn main() {
     
 
     let mvp_matrix: [[f32; 4]; 4] = (projection * view * model).into();
-    let u_mvp_matrix = get_uniform(program, "u_mvp_matrix");
+    let u_mvp_matrix = program.get_uniform( "u_mvp_matrix");
 
     unsafe { gl::UniformMatrix4fv(u_mvp_matrix, 1, gl::FALSE, mvp_matrix[0].as_ptr()) };
 
@@ -135,19 +103,19 @@ fn main() {
                 _ => ()
             },
             Event::RedrawRequested(_) => {
-                draw(&context, vertex_buffer, vertex_array, program);
+                draw(&context, vertex_buffer, vertex_array, &program);
             },
             _ => (),
         }
     });
 }
 
-fn draw(context: &glutin::ContextWrapper<PossiblyCurrent, glutin::window::Window>, vertex_buffer: u32, vertex_array: u32, program: u32) {
-    unsafe {
-        gl::Clear(gl::COLOR_BUFFER_BIT);
-        
-        gl::UseProgram(program);
+fn draw(context: &glutin::ContextWrapper<PossiblyCurrent, glutin::window::Window>, vertex_buffer: u32, vertex_array: u32, program: &Program) {
+    unsafe { gl::Clear(gl::COLOR_BUFFER_BIT) };
 
+    program.bind();
+
+    unsafe {
         gl::BindBuffer(gl::ARRAY_BUFFER, vertex_buffer);
         gl::BindVertexArray(vertex_array);
 
@@ -169,18 +137,65 @@ fn check_errors() {
 }
 
 // TODO: Move into struct
-fn get_uniform(program: u32, uniform_name: &str) -> i32 {
-    // Bind the CString to a variable so it doesn't go out of scope
-    let uniform_name_cstring = CString::new(uniform_name).expect("Invalid string to be converted to CString (might have null byte)");
 
-    // Able to use the pointer here because it hasn't been freed, and return the location
-    let location = unsafe { gl::GetUniformLocation(program, uniform_name_cstring.as_ptr()) };
 
-    if location == -1 {
-        panic!("Uniform {} doesn't exist", uniform_name);
+struct Program {
+    id: u32
+}
+
+impl Program {
+    fn new(name: &str) -> Program {
+        // Load shaders from their respective files
+        let path = format!("./res/shaders/{}", name);
+
+        let vertex_shader_source = read_to_string(format!("{}/vertex.glsl", path)).expect("Problem reading shader");
+        let fragment_shader_source = read_to_string(format!("{}/fragment.glsl", path)).expect("Problem reading shader");
+
+        let vertex_shader = Shader::new(ShaderType::Vertex, &vertex_shader_source);
+        let fragment_shader = Shader::new(ShaderType::Fragment, &fragment_shader_source);
+
+        let id = unsafe { gl::CreateProgram() };
+
+        unsafe {
+            // Attach the shaders
+            gl::AttachShader(id, vertex_shader.id);
+            gl::AttachShader(id, fragment_shader.id);
+
+            // Link and check the program
+            gl::LinkProgram(id);
+            gl::ValidateProgram(id);
+        }
+
+        unsafe {
+            // Should be done when they go out of scope
+            gl::DeleteShader(vertex_shader.id);
+            gl::DeleteShader(fragment_shader.id);
+        }
+
+        Program {
+            id
+        }
     }
 
-    location
+    fn bind(&self) {
+        unsafe {
+            gl::UseProgram(self.id);
+        };
+    }
+
+    fn get_uniform(&self, uniform_name: &str) -> i32 {
+        // Bind the CString to a variable so it doesn't go out of scope
+        let uniform_name_cstring = CString::new(uniform_name).expect("Invalid string to be converted to CString (might have null byte)");
+
+        // Able to use the pointer here because it hasn't been freed, and return the location
+        let location = unsafe { gl::GetUniformLocation(self.id, uniform_name_cstring.as_ptr()) };
+
+        if location == -1 {
+            panic!("Uniform {} doesn't exist", uniform_name);
+        }
+
+        location
+    }
 }
 
 enum ShaderType {
