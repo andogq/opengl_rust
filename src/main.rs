@@ -103,28 +103,24 @@ fn main() {
                 _ => ()
             },
             Event::RedrawRequested(_) => {
-                draw(&context, vertex_buffer, vertex_array, &program);
+                unsafe { gl::Clear(gl::COLOR_BUFFER_BIT) };
+
+                program.bind();
+
+                unsafe {
+                    gl::BindBuffer(gl::ARRAY_BUFFER, vertex_buffer);
+                    gl::BindVertexArray(vertex_array);
+
+                    gl::DrawElements(gl::TRIANGLES, 6, gl::UNSIGNED_INT, std::ptr::null());
+                };
+
+                context.swap_buffers().unwrap();
+
+                check_errors();
             },
             _ => (),
         }
     });
-}
-
-fn draw(context: &glutin::ContextWrapper<PossiblyCurrent, glutin::window::Window>, vertex_buffer: u32, vertex_array: u32, program: &Program) {
-    unsafe { gl::Clear(gl::COLOR_BUFFER_BIT) };
-
-    program.bind();
-
-    unsafe {
-        gl::BindBuffer(gl::ARRAY_BUFFER, vertex_buffer);
-        gl::BindVertexArray(vertex_array);
-
-        gl::DrawElements(gl::TRIANGLES, 6, gl::UNSIGNED_INT, std::ptr::null());
-    };
-
-    context.swap_buffers().unwrap();
-
-    check_errors();
 }
 
 fn check_errors() {
@@ -135,9 +131,6 @@ fn check_errors() {
         else { break; }
     }
 }
-
-// TODO: Move into struct
-
 
 struct Program {
     id: u32
