@@ -1,4 +1,5 @@
 use gl::types::*;
+
 use glutin::event::{Event, WindowEvent};
 use glutin::event_loop::{ControlFlow, EventLoop};
 use glutin::window::WindowBuilder;
@@ -6,12 +7,13 @@ use glutin::{ContextBuilder};
 
 use cgmath::{Matrix4, SquareMatrix, Vector3, ortho};
 
-use std::ffi::{CStr, CString};
-use std::os::raw::c_char;
+use std::ffi::{CStr};
 use std::mem;
 
-use std::fs::read_to_string;
 use std::time;
+
+mod program;
+use program::*;
 
 const WINDOW_WIDTH: u32 = 640;
 const WINDOW_HEIGHT: u32 = 480;
@@ -168,111 +170,5 @@ fn check_errors() {
 
         if error != 0 { println!("[!] OpenGL Error: 0x{:x}", error); }
         else { break; }
-    }
-}
-
-struct Program {
-    id: u32
-}
-
-impl Program {
-    fn new(name: &str) -> Program {
-        // Load shaders from their respective files
-        let path = format!("./res/shaders/{}", name);
-
-        let vertex_shader_source = read_to_string(format!("{}/vertex.glsl", path)).expect("Problem reading shader");
-        let fragment_shader_source = read_to_string(format!("{}/fragment.glsl", path)).expect("Problem reading shader");
-
-        let vertex_shader = Shader::new(ShaderType::Vertex, &vertex_shader_source);
-        let fragment_shader = Shader::new(ShaderType::Fragment, &fragment_shader_source);
-
-        let id = unsafe { gl::CreateProgram() };
-
-        unsafe {
-            // Attach the shaders
-            gl::AttachShader(id, vertex_shader.id);
-            gl::AttachShader(id, fragment_shader.id);
-
-            // Link and check the program
-            gl::LinkProgram(id);
-            gl::ValidateProgram(id);
-        }
-
-        unsafe {
-            // Should be done when they go out of scope
-            gl::DeleteShader(vertex_shader.id);
-            gl::DeleteShader(fragment_shader.id);
-        }
-
-        Program {
-            id
-        }
-    }
-
-    fn bind(&self) {
-        unsafe {
-            gl::UseProgram(self.id);
-        };
-    }
-
-    fn get_uniform(&self, uniform_name: &str) -> i32 {
-        // Bind the CString to a variable so it doesn't go out of scope
-        let uniform_name_cstring = CString::new(uniform_name).expect("Invalid string to be converted to CString (might have null byte)");
-
-        // Able to use the pointer here because it hasn't been freed, and return the location
-        let location = unsafe { gl::GetUniformLocation(self.id, uniform_name_cstring.as_ptr()) };
-
-        if location == -1 {
-            panic!("Uniform {} doesn't exist", uniform_name);
-        }
-
-        location
-    }
-}
-
-enum ShaderType {
-    Vertex,
-    Fragment
-}
-
-struct Shader {
-    id: u32
-}
-
-impl Shader {
-    fn new(shader_type: ShaderType, source: &String) -> Shader {
-        // Create the shader
-        let id = unsafe { gl::CreateShader(match shader_type { ShaderType::Vertex => gl::VERTEX_SHADER, ShaderType::Fragment => gl::FRAGMENT_SHADER }) };
-
-        // Load the source and compile the shader
-        unsafe {
-            gl::ShaderSource(id, 1, &(source.as_ptr() as *const c_char), std::ptr::null());
-            gl::CompileShader(id);
-        };
-
-        // Check for compilation errors
-        let mut compilation_result = 0;
-        unsafe { gl::GetShaderiv(id, gl::COMPILE_STATUS, &mut compilation_result) };
-        if compilation_result == gl::FALSE as i32 {
-            println!("Problem compiling shader");
-
-            // Get the size of the error to create the buffer
-            let mut error_length = 0;
-            unsafe { gl::GetShaderiv(id, gl::INFO_LOG_LENGTH, &mut error_length) };
-
-            // Work out how to generate character buffer to pass to shader to get error
-            let mut buffer: Vec<u8> = Vec::with_capacity((error_length + 1) as usize);
-            buffer.extend([b' '].iter().cycle().take(error_length as usize));
-
-            let error = unsafe { CString::from_vec_unchecked(buffer) };
-            unsafe{ gl::GetShaderInfoLog(id, error_length, std::ptr::null_mut(), error.as_ptr() as *mut i8) };
-
-            println!("{:?}", error);
-        };
-
-        // Return the shader struct
-        Shader {
-            id
-        }
     }
 }
