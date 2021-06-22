@@ -2,7 +2,7 @@ use gl::types::*;
 use glutin::event::{Event, WindowEvent};
 use glutin::event_loop::{ControlFlow, EventLoop};
 use glutin::window::WindowBuilder;
-use glutin::{ContextBuilder, PossiblyCurrent};
+use glutin::{ContextBuilder};
 
 use cgmath::{Matrix4, SquareMatrix, Vector3, ortho};
 
@@ -11,9 +11,12 @@ use std::os::raw::c_char;
 use std::mem;
 
 use std::fs::read_to_string;
+use std::time::Instant;
 
 const WINDOW_WIDTH: u32 = 640;
 const WINDOW_HEIGHT: u32 = 480;
+
+const FPS: u32 = 60;
 
 fn main() {
     // Create the window and event loop
@@ -81,19 +84,19 @@ fn main() {
 
     let projection = ortho(0.0, WINDOW_WIDTH as f32, 0.0, WINDOW_HEIGHT as f32, 0.0, 1.0);
     let view = Matrix4::identity();
-    let model = Matrix4::from_scale(100.0) + Matrix4::from_translation(Vector3::new(200.0, 200.0, 0.0));
+    let model = Matrix4::from_scale(100.0);
     
-
-    let mvp_matrix: [[f32; 4]; 4] = (projection * view * model).into();
     let u_mvp_matrix = program.get_uniform( "u_mvp_matrix");
-
+    
+    let mvp_matrix: [[f32; 4]; 4] = (projection * view * model).into();
     unsafe { gl::UniformMatrix4fv(u_mvp_matrix, 1, gl::FALSE, mvp_matrix[0].as_ptr()) };
-
     
     println!("[+] Beginning main loop");
 
     // Run the event loop
     el.run(move |event, _, control_flow| {
+        let start_time = Instant::now();
+
         // Check what type of event has been called
         match event {
             Event::LoopDestroyed => return,
@@ -119,6 +122,23 @@ fn main() {
                 check_errors();
             },
             _ => (),
+        }
+
+        match *control_flow {
+            ControlFlow::Exit => (),
+            _ => {
+                // Redraw
+                context.window().request_redraw();
+
+                // Sleep until next frame should be drawn
+                let elapsed = Instant::now().duration_since(start_time).as_millis() as u32;
+                let wait_time = match 1000 / FPS >= elapsed {
+                    true => { (1000 / FPS) - elapsed },
+                    false => { 0 }
+                };
+
+                *control_flow = ControlFlow::WaitUntil(start_time + std::time::Duration::from_millis(wait_time as u64));
+            }
         }
     });
 }
