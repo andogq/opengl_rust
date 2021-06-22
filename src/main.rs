@@ -4,14 +4,19 @@ use glutin::event_loop::{ControlFlow, EventLoop};
 use glutin::window::WindowBuilder;
 use glutin::{ContextBuilder, PossiblyCurrent};
 
+use cgmath::{Matrix4, SquareMatrix, Vector3, ortho};
+
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
 use std::mem;
 
+const WINDOW_WIDTH: u32 = 640;
+const WINDOW_HEIGHT: u32 = 480;
+
 fn main() {
     // Create the window and event loop
     let el = EventLoop::new();
-    let wb = WindowBuilder::new().with_title("Hello");
+    let wb = WindowBuilder::new().with_title("Hello").with_inner_size(glutin::dpi::LogicalSize::new(WINDOW_WIDTH, WINDOW_HEIGHT));
 
     // Load the context
     let context = ContextBuilder::new().build_windowed(wb, &el).unwrap();
@@ -31,10 +36,10 @@ fn main() {
 
     // Set up the positions
     let positions: [GLfloat; 8] = [
-        -0.5,  0.5,
-         0.5,  0.5,
-         0.5, -0.5,
-        -0.5, -0.5
+        0.0, 1.0,
+        1.0, 1.0,
+        1.0, 0.0,
+        0.0, 0.0
     ];
 
     let indexes: [GLuint; 6] = [
@@ -46,8 +51,10 @@ fn main() {
         #version 330 core
         layout(location = 0) in vec4 position;
 
+        uniform mat4 u_mvp_matrix;
+
         void main() {
-            gl_Position = position;
+            gl_Position = u_mvp_matrix * position;
         }"#);
     let fragment_shader_source = String::from(r#"
         #version 330 core
@@ -74,6 +81,7 @@ fn main() {
         gl::LinkProgram(program);
         gl::ValidateProgram(program);
 
+        // Probably shouldn't delete them here, since the structs are still in scope
         gl::DeleteShader(vertex_shader.id);
         gl::DeleteShader(fragment_shader.id);
 
@@ -102,6 +110,17 @@ fn main() {
         // Ensure there's no errors
         check_errors();
     };
+
+    let projection = ortho(0.0, WINDOW_WIDTH as f32, 0.0, WINDOW_HEIGHT as f32, 0.0, 1.0);
+    let view = Matrix4::identity();
+    let model = Matrix4::from_scale(100.0) + Matrix4::from_translation(Vector3::new(200.0, 200.0, 0.0));
+    
+
+    let mvp_matrix: [[f32; 4]; 4] = (projection * view * model).into();
+    let u_mvp_matrix = get_uniform(program, "u_mvp_matrix");
+
+    unsafe { gl::UniformMatrix4fv(u_mvp_matrix, 1, gl::FALSE, mvp_matrix[0].as_ptr()) };
+
     
     println!("[+] Beginning main loop");
 
@@ -116,21 +135,21 @@ fn main() {
                 _ => ()
             },
             Event::RedrawRequested(_) => {
-                draw(&context, &vertex_buffer, &vertex_array, &program);
+                draw(&context, vertex_buffer, vertex_array, program);
             },
             _ => (),
         }
     });
 }
 
-fn draw(context: &glutin::ContextWrapper<PossiblyCurrent, glutin::window::Window>, vertex_buffer: &u32, vertex_array: &u32, program: &u32) {
+fn draw(context: &glutin::ContextWrapper<PossiblyCurrent, glutin::window::Window>, vertex_buffer: u32, vertex_array: u32, program: u32) {
     unsafe {
         gl::Clear(gl::COLOR_BUFFER_BIT);
         
-        gl::UseProgram(*program);
+        gl::UseProgram(program);
 
-        gl::BindBuffer(gl::ARRAY_BUFFER, *vertex_buffer);
-        gl::BindVertexArray(*vertex_array);
+        gl::BindBuffer(gl::ARRAY_BUFFER, vertex_buffer);
+        gl::BindVertexArray(vertex_array);
 
         gl::DrawElements(gl::TRIANGLES, 6, gl::UNSIGNED_INT, std::ptr::null());
     };
@@ -147,6 +166,21 @@ fn check_errors() {
         if error != 0 { println!("[!] OpenGL Error: 0x{:x}", error); }
         else { break; }
     }
+}
+
+// TODO: Move into struct
+fn get_uniform(program: u32, uniform_name: &str) -> i32 {
+    // Bind the CString to a variable so it doesn't go out of scope
+    let uniform_name_cstring = CString::new(uniform_name).expect("Invalid string to be converted to CString (might have null byte)");
+
+    // Able to use the pointer here because it hasn't been freed, and return the location
+    let location = unsafe { gl::GetUniformLocation(program, uniform_name_cstring.as_ptr()) };
+
+    if location == -1 {
+        panic!("Uniform {} doesn't exist", uniform_name);
+    }
+
+    location
 }
 
 enum ShaderType {
