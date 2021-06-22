@@ -87,9 +87,19 @@ fn main() {
     let model = Matrix4::from_scale(100.0);
     
     let u_mvp_matrix = program.get_uniform( "u_mvp_matrix");
-    
+
     let mvp_matrix: [[f32; 4]; 4] = (projection * view * model).into();
     unsafe { gl::UniformMatrix4fv(u_mvp_matrix, 1, gl::FALSE, mvp_matrix[0].as_ptr()) };
+
+    let u_color = program.get_uniform("u_color");
+
+    let mut r = 0.0;
+    let mut b = 1.0;
+    let mut g = 0.0;
+
+    let mut dr = 0.0001;
+    let mut dg = -0.0001;
+    let mut db = 0.00005;
     
     println!("[+] Beginning main loop");
 
@@ -109,6 +119,16 @@ fn main() {
                 unsafe { gl::Clear(gl::COLOR_BUFFER_BIT) };
 
                 program.bind();
+
+                r += dr;
+                g += dg;
+                b += db;
+
+                if r <= 0.0 || r >= 1.0 { dr *= -1.0; }
+                if g <= 0.0 || g >= 1.0 { dg *= -1.0; }
+                if b <= 0.0 || b >= 1.0 { db *= -1.0; }
+
+                unsafe { gl::Uniform4f(u_color, r, g, b, 1.0) };
 
                 unsafe {
                     gl::BindBuffer(gl::ARRAY_BUFFER, vertex_buffer);
