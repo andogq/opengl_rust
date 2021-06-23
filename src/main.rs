@@ -5,7 +5,7 @@ use glutin::event_loop::{ControlFlow, EventLoop};
 use glutin::window::WindowBuilder;
 use glutin::{ContextBuilder};
 
-use cgmath::{Matrix4, SquareMatrix, Vector3, ortho};
+use cgmath::{Matrix4, SquareMatrix, ortho};
 
 use std::ffi::{CStr};
 use std::mem;
@@ -43,10 +43,10 @@ fn main() {
 
     // Set up the positions
     let positions: [GLfloat; 8] = [
-        0.0, 1.0,
-        1.0, 1.0,
-        1.0, 0.0,
-        0.0, 0.0
+        -1.0,  1.0,
+         1.0,  1.0,
+         1.0, -1.0,
+        -1.0, -1.0
     ];
 
     let indexes: [GLuint; 6] = [
@@ -84,11 +84,14 @@ fn main() {
         check_errors();
     };
 
-    let projection = ortho(0.0, WINDOW_WIDTH as f32, 0.0, WINDOW_HEIGHT as f32, 0.0, 1.0);
+    let projection = ortho(-(WINDOW_WIDTH as f32)/2.0, (WINDOW_WIDTH as f32)/2.0, -(WINDOW_HEIGHT as f32)/2.0, (WINDOW_HEIGHT as f32)/2.0, 0.0, 1.0);
     let view = Matrix4::identity();
-    let mut model = Matrix4::from_scale(100.0);
+    let model = Matrix4::from_scale(100.0);
     
     let u_mvp_matrix = program.get_uniform( "u_mvp_matrix");
+
+    let mvp_matrix: [[f32; 4]; 4] = (projection * view * model).into();
+    unsafe { gl::UniformMatrix4fv(u_mvp_matrix, 1, gl::FALSE, mvp_matrix[0].as_ptr()) };
 
     let u_color = program.get_uniform("u_color");
 
@@ -128,11 +131,6 @@ fn main() {
                 if b <= 0.0 || b >= 1.0 { db *= -1.0; }
 
                 unsafe { gl::Uniform4f(u_color, r, g, b, 1.0) };
-
-                model = Matrix4::from_translation(Vector3::new(1.0, 0.0, 0.0)) * model;
-
-                let mvp_matrix: [[f32; 4]; 4] = (projection * view * model).into();
-                unsafe { gl::UniformMatrix4fv(u_mvp_matrix, 1, gl::FALSE, mvp_matrix[0].as_ptr()) };
 
                 unsafe {
                     gl::BindBuffer(gl::ARRAY_BUFFER, vertex_buffer);
