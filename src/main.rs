@@ -5,7 +5,7 @@ use glutin::event_loop::{ControlFlow, EventLoop};
 use glutin::window::WindowBuilder;
 use glutin::{ContextBuilder};
 
-use cgmath::{Matrix4, SquareMatrix, ortho};
+use cgmath::{Matrix4, Vector3, ortho, perspective};
 
 use std::ffi::{CStr};
 use std::mem;
@@ -17,6 +17,8 @@ use program::*;
 
 const WINDOW_WIDTH: u32 = 640;
 const WINDOW_HEIGHT: u32 = 480;
+
+const PI : f32 = 3.141592653589793;
 
 const FPS: u32 = 60;
 
@@ -42,11 +44,11 @@ fn main() {
     unsafe { gl::ClearColor(0.0, 0.0, 0.0, 1.0) };
 
     // Set up the positions
-    let positions: [GLfloat; 8] = [
-        -1.0,  1.0,
-         1.0,  1.0,
-         1.0, -1.0,
-        -1.0, -1.0
+    let positions: [GLfloat; 12] = [
+        -1.0,  1.0,  0.0,
+         1.0,  1.0,  0.0,
+         1.0, -1.0,  0.0,
+        -1.0, -1.0,  0.0
     ];
 
     let indexes: [GLuint; 6] = [
@@ -73,7 +75,7 @@ fn main() {
 
         // Create an attribute
         gl::EnableVertexAttribArray(0);
-        gl::VertexAttribPointer(0, 2, gl::FLOAT, gl::FALSE as GLboolean, 0, std::ptr::null());
+        gl::VertexAttribPointer(0, 3, gl::FLOAT, gl::FALSE as GLboolean, 0, std::ptr::null());
         
         // Initialise index buffer
         gl::GenBuffers(1, &mut index_buffer);
@@ -84,14 +86,13 @@ fn main() {
         check_errors();
     };
 
-    let projection = ortho(-(WINDOW_WIDTH as f32)/2.0, (WINDOW_WIDTH as f32)/2.0, -(WINDOW_HEIGHT as f32)/2.0, (WINDOW_HEIGHT as f32)/2.0, 0.0, 1.0);
-    let view = Matrix4::identity();
-    let model = Matrix4::from_scale(100.0);
+    // let projection = ortho(-(WINDOW_WIDTH as f32)/2.0, (WINDOW_WIDTH as f32)/2.0, -(WINDOW_HEIGHT as f32)/2.0, (WINDOW_HEIGHT as f32)/2.0, -10000.0, 10000.0);
+    let projection = perspective(cgmath::Rad(50.0/180.0*PI), (WINDOW_WIDTH as f32)/(WINDOW_HEIGHT as f32), 0.1, 10000.0);
+    let model = Matrix4::from_scale(1.0);
+    let mut camera_position = Vector3::new(0.0, 0.0, -1.0);
+    let mut camera_rotation = Vector3::new(0.0, 0.0, 0.0);
     
     let u_mvp_matrix = program.get_uniform( "u_mvp_matrix");
-
-    let mvp_matrix: [[f32; 4]; 4] = (projection * view * model).into();
-    unsafe { gl::UniformMatrix4fv(u_mvp_matrix, 1, gl::FALSE, mvp_matrix[0].as_ptr()) };
 
     let u_color = program.get_uniform("u_color");
 
@@ -99,9 +100,9 @@ fn main() {
     let mut b = 1.0;
     let mut g = 0.0;
 
-    let mut dr = 0.0001;
-    let mut dg = -0.0001;
-    let mut db = 0.00005;
+    let mut dr = 0.001;
+    let mut dg = -0.001;
+    let mut db = 0.0005;
     
     println!("[+] Beginning main loop");
 
@@ -115,6 +116,22 @@ fn main() {
             Event::WindowEvent { event, .. } => match event {
                 WindowEvent::Resized(physical_size) => context.resize(physical_size),
                 WindowEvent::CloseRequested => *control_flow = ControlFlow::Exit,
+                WindowEvent::KeyboardInput {
+                    input: glutin::event::KeyboardInput {
+                        virtual_keycode: Some(virtual_code),
+                        state,
+                        ..
+                    },
+                    ..
+                } => match (virtual_code, state) {
+                    (glutin::event::VirtualKeyCode::A, glutin::event::ElementState::Pressed) => camera_position.x += 0.5,
+                    (glutin::event::VirtualKeyCode::D, glutin::event::ElementState::Pressed) => camera_position.x -= 0.5,
+                    (glutin::event::VirtualKeyCode::W, glutin::event::ElementState::Pressed) => camera_position.y -= 0.5,
+                    (glutin::event::VirtualKeyCode::S, glutin::event::ElementState::Pressed) => camera_position.y += 0.5,
+                    (glutin::event::VirtualKeyCode::Up, glutin::event::ElementState::Pressed) => camera_position.z += 0.5,
+                    (glutin::event::VirtualKeyCode::Down, glutin::event::ElementState::Pressed) => camera_position.z -= 0.5,
+                    _ => ()
+                },
                 _ => ()
             },
             Event::RedrawRequested(_) => {
@@ -130,7 +147,14 @@ fn main() {
                 if g <= 0.0 || g >= 1.0 { dg *= -1.0; }
                 if b <= 0.0 || b >= 1.0 { db *= -1.0; }
 
+                // camera_rotation.x += PI/1000.0;
+                // camera_rotation.y += PI/1000.0;
+
                 unsafe { gl::Uniform4f(u_color, r, g, b, 1.0) };
+
+                let view = Matrix4::from_angle_x(cgmath::Rad(camera_rotation.x)) * Matrix4::from_angle_y(cgmath::Rad(camera_rotation.y)) * Matrix4::from_angle_z(cgmath::Rad(camera_rotation.z)) * Matrix4::from_translation(camera_position);
+                let mvp_matrix: [[f32; 4]; 4] = (projection * view * model).into();
+                unsafe { gl::UniformMatrix4fv(u_mvp_matrix, 1, gl::FALSE, mvp_matrix[0].as_ptr()) };
 
                 unsafe {
                     gl::BindBuffer(gl::ARRAY_BUFFER, vertex_buffer);
