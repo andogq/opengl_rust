@@ -15,6 +15,12 @@ use std::time;
 mod program;
 use program::*;
 
+mod renderer;
+mod camera;
+mod object;
+
+use renderer::vertex_array::*;
+
 const WINDOW_WIDTH: u32 = 640;
 const WINDOW_HEIGHT: u32 = 480;
 
@@ -56,27 +62,21 @@ fn main() {
         2, 3, 0
     ];
     
-    let mut vertex_buffer: u32 = 0;
     let mut index_buffer: u32 = 0;
-    let mut vertex_array: u32 = 0;
 
     let program = Program::new("basic");
     program.bind();
+
+    let mut vertex_array = VertexArray::new( Vec::from([
+        Layout {
+            normalised: gl::FALSE,
+            size: 3
+        }
+    ]));
+
+    vertex_array.set_data(&positions);
     
     unsafe {
-        // Initialise vertex buffer
-        gl::GenBuffers(1, &mut vertex_buffer);
-        gl::BindBuffer(gl::ARRAY_BUFFER, vertex_buffer);
-        gl::BufferData(gl::ARRAY_BUFFER, (positions.len() * mem::size_of::<GLfloat>()) as GLsizeiptr, mem::transmute(&positions[0]), gl::STATIC_DRAW);
-
-        // Create a vertex array
-        gl::GenVertexArrays(1, &mut vertex_array);
-        gl::BindVertexArray(vertex_array);
-
-        // Create an attribute
-        gl::EnableVertexAttribArray(0);
-        gl::VertexAttribPointer(0, 3, gl::FLOAT, gl::FALSE as GLboolean, 0, std::ptr::null());
-        
         // Initialise index buffer
         gl::GenBuffers(1, &mut index_buffer);
         gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, index_buffer);
@@ -156,12 +156,9 @@ fn main() {
                 let mvp_matrix: [[f32; 4]; 4] = (projection * view * model).into();
                 unsafe { gl::UniformMatrix4fv(u_mvp_matrix, 1, gl::FALSE, mvp_matrix[0].as_ptr()) };
 
-                unsafe {
-                    gl::BindBuffer(gl::ARRAY_BUFFER, vertex_buffer);
-                    gl::BindVertexArray(vertex_array);
+                vertex_array.bind();
 
-                    gl::DrawElements(gl::TRIANGLES, 6, gl::UNSIGNED_INT, std::ptr::null());
-                };
+                unsafe { gl::DrawElements(gl::TRIANGLES, 6, gl::UNSIGNED_INT, std::ptr::null()) };
 
                 context.swap_buffers().unwrap();
 

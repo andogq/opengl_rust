@@ -1,6 +1,8 @@
 use std::fs::read_to_string;
 use std::ffi::{CString};
 
+use cgmath::Matrix4;
+
 mod shader;
 use shader::*;
 
@@ -60,5 +62,9 @@ impl Program {
         }
 
         location
+    }
+
+    pub fn set_uniform(&self, uniform_name: &str, matrix: &Matrix4<f32>) {
+
     }
 }
