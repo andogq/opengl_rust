@@ -8,7 +8,6 @@ use glutin::{ContextBuilder};
 use cgmath::{Matrix4, Vector3, ortho, perspective};
 
 use std::ffi::{CStr};
-use std::mem;
 
 use std::time;
 
@@ -57,13 +56,11 @@ fn main() {
         -1.0, -1.0,  0.0
     ];
 
-    let indexes: [GLuint; 6] = [
+    let indices: [GLuint; 6] = [
         0, 1, 2,
         2, 3, 0
     ];
     
-    let mut index_buffer: u32 = 0;
-
     let program = Program::new("basic");
     program.bind();
 
@@ -75,17 +72,8 @@ fn main() {
     ]));
 
     vertex_array.set_data(&positions);
+    vertex_array.set_indices(&indices);
     
-    unsafe {
-        // Initialise index buffer
-        gl::GenBuffers(1, &mut index_buffer);
-        gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, index_buffer);
-        gl::BufferData(gl::ELEMENT_ARRAY_BUFFER, (indexes.len() * mem::size_of::<i32>()) as isize, mem::transmute(&indexes[0]), gl::STATIC_DRAW);
-        
-        // Ensure there's no errors
-        check_errors();
-    };
-
     // let projection = ortho(-(WINDOW_WIDTH as f32)/2.0, (WINDOW_WIDTH as f32)/2.0, -(WINDOW_HEIGHT as f32)/2.0, (WINDOW_HEIGHT as f32)/2.0, -10000.0, 10000.0);
     let projection = perspective(cgmath::Rad(50.0/180.0*PI), (WINDOW_WIDTH as f32)/(WINDOW_HEIGHT as f32), 0.1, 10000.0);
     let model = Matrix4::from_scale(1.0);
