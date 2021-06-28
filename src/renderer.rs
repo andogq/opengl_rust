@@ -1,28 +1,24 @@
-use crate::camera::*;
-use crate::object::*;
+// use crate::camera::*;
 
-pub mod vertex_array;
-use vertex_array::*;
+// pub struct Renderer {
+//     camera: Camera,
+//     objects: Vec<Object>
+// }
 
-pub struct Renderer {
-    camera: Camera,
-    objects: Vec<Object>
-}
+// impl Renderer {
+//     pub fn draw(&self) {
+//         let vp_matrix = self.camera.projection_matrix * self.camera.view_matrix;
+//         for object in self.objects.iter() {
+//             // Create the mvp matrix
+//             let mvp_matrix = vp_matrix * object.model_matrix;
 
-impl Renderer {
-    pub fn draw(&self) {
-        let vp_matrix = self.camera.projection_matrix * self.camera.view_matrix;
-        for object in self.objects.iter() {
-            // Create the mvp matrix
-            let mvp_matrix = vp_matrix * object.model_matrix;
+//             // Bind the program
+//             object.program.bind();
 
-            // Bind the program
-            object.program.bind();
+//             // Load it into the program
+//             object.program.set_uniform("u_mvp_matrix", &mvp_matrix);
 
-            // Load it into the program
-            object.program.set_uniform("u_mvp_matrix", &mvp_matrix);
-
-            // vertex_array.add()
-        }
-    }
-}
+//             // vertex_array.add()
+//         }
+//     }
+// }

@@ -22,3 +22,20 @@
        rendered in one call (model matricies passed in to gpu, and ID of the
        matrix is stored in the vertex buffer for each vertex)
  - [ ] Point type
+ - [ ] Find new name for vertex array class
+
+# Structure
+ - Engine
+    - Objects
+       - Each object links with a model
+       - Contains position, scale, rotation ect ect
+    - Models
+       - Contains the vertex array object
+       - Selects which shader should be used
+    - Shaders
+       - Loads and compiles shader programs
+       - Hashmap with string and program id
+    - Cameras
+       - List of cameras in the world and their positions
+    - Renderer
+       - Takes in some objects and a camera and does the rendering

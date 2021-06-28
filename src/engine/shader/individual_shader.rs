@@ -6,12 +6,12 @@ pub enum ShaderType {
     Fragment
 }
 
-pub struct Shader {
+pub struct IndividualShader {
     pub id: u32
 }
 
-impl Shader {
-    pub fn new(shader_type: ShaderType, source: &String) -> Shader {
+impl IndividualShader {
+    pub fn new(shader_type: ShaderType, source: &String) -> IndividualShader {
         // Create the shader
         let id = unsafe { gl::CreateShader(match shader_type { ShaderType::Vertex => gl::VERTEX_SHADER, ShaderType::Fragment => gl::FRAGMENT_SHADER }) };
 
@@ -42,7 +42,7 @@ impl Shader {
         };
 
         // Return the shader struct
-        Shader {
+        IndividualShader {
             id
         }
     }

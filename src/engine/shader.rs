@@ -3,23 +3,23 @@ use std::ffi::{CString};
 
 use cgmath::Matrix4;
 
-mod shader;
-use shader::*;
+mod individual_shader;
+use individual_shader::*;
 
-pub struct Program {
+pub struct Shader {
     pub id: u32
 }
 
-impl Program {
-    pub fn new(name: &str) -> Program {
+impl Shader {
+    pub fn new(name: &str) -> Shader {
         // Load shaders from their respective files
         let path = format!("./res/shaders/{}", name);
 
         let vertex_shader_source = read_to_string(format!("{}/vertex.glsl", path)).expect("Problem reading shader");
         let fragment_shader_source = read_to_string(format!("{}/fragment.glsl", path)).expect("Problem reading shader");
 
-        let vertex_shader = Shader::new(ShaderType::Vertex, &vertex_shader_source);
-        let fragment_shader = Shader::new(ShaderType::Fragment, &fragment_shader_source);
+        let vertex_shader = IndividualShader::new(ShaderType::Vertex, &vertex_shader_source);
+        let fragment_shader = IndividualShader::new(ShaderType::Fragment, &fragment_shader_source);
 
         let id = unsafe { gl::CreateProgram() };
 
@@ -39,7 +39,7 @@ impl Program {
             gl::DeleteShader(fragment_shader.id);
         }
 
-        Program {
+        Shader {
             id
         }
     }
