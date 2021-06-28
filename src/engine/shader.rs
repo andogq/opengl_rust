@@ -7,30 +7,40 @@ mod individual_shader;
 use individual_shader::*;
 
 pub struct Shader {
-    pub id: u32
+    id: u32,
+    built: bool,
+    path: String
 }
 
 impl Shader {
     pub fn new(name: &str) -> Shader {
-        // Load shaders from their respective files
         let path = format!("./res/shaders/{}", name);
 
-        let vertex_shader_source = read_to_string(format!("{}/vertex.glsl", path)).expect("Problem reading shader");
-        let fragment_shader_source = read_to_string(format!("{}/fragment.glsl", path)).expect("Problem reading shader");
+        Shader {
+            id: 0,
+            built: false,
+            path
+        }
+    }
+
+    pub fn build(&mut self) {
+        // Load shaders from their respective files
+        let vertex_shader_source = read_to_string(format!("{}/vertex.glsl", self.path)).expect("Problem reading shader");
+        let fragment_shader_source = read_to_string(format!("{}/fragment.glsl", self.path)).expect("Problem reading shader");
 
         let vertex_shader = IndividualShader::new(ShaderType::Vertex, &vertex_shader_source);
         let fragment_shader = IndividualShader::new(ShaderType::Fragment, &fragment_shader_source);
 
-        let id = unsafe { gl::CreateProgram() };
+        self.id = unsafe { gl::CreateProgram() };
 
         unsafe {
             // Attach the shaders
-            gl::AttachShader(id, vertex_shader.id);
-            gl::AttachShader(id, fragment_shader.id);
+            gl::AttachShader(self.id, vertex_shader.id);
+            gl::AttachShader(self.id, fragment_shader.id);
 
             // Link and check the program
-            gl::LinkProgram(id);
-            gl::ValidateProgram(id);
+            gl::LinkProgram(self.id);
+            gl::ValidateProgram(self.id);
         }
 
         unsafe {
@@ -39,9 +49,7 @@ impl Shader {
             gl::DeleteShader(fragment_shader.id);
         }
 
-        Shader {
-            id
-        }
+        self.built = true;
     }
 
     pub fn bind(&self) {

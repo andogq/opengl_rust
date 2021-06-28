@@ -14,8 +14,6 @@ use std::collections::HashMap;
 
 use cgmath::Vector3;
 
-use gl::types::*;
-
 use glutin::event::{Event, WindowEvent};
 use glutin::event_loop::{ControlFlow, EventLoop};
 use glutin::window::WindowBuilder;
@@ -71,6 +69,11 @@ impl Engine {
         // Initialise renderer
         self.renderer.init();
 
+        // Build shaders
+        for shader in self.shaders.values_mut() {
+            shader.build();
+        }
+
         println!("[+] Beginning main loop");
 
         // Setup the event loop listener
@@ -114,6 +117,7 @@ impl Engine {
     }
 
     pub fn add_shader(&mut self, name: &str) {
+        println!("Adding shader `{}`", name);
         self.shaders.entry(String::from(name)).or_insert(Shader::new(name));
     }
 
