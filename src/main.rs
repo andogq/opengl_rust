@@ -43,7 +43,7 @@ fn main() {
 
     engine.add_shader("basic");
     engine.add_model("square", &positions, &indices, "basic");
-    // engine.add_object("square", Vector3::new(0.0, 0.0, 0.0), Vector3::new(100.0, 100.0, 1.0));
+    engine.add_object("square", Vector3::new(0.0, 0.0, 0.0), Vector3::new(100.0, 100.0, 1.0));
 
     // engine.add_camera("main", Vector3::new(0.0, 0.0, 0.0));
 

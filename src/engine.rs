@@ -18,7 +18,6 @@ use glutin::event::{Event, WindowEvent};
 use glutin::event_loop::{ControlFlow, EventLoop};
 use glutin::window::{Window, WindowBuilder};
 use glutin::{ContextBuilder, ContextWrapper, PossiblyCurrent};
-use glutin::platform::run_return::EventLoopExtRunReturn;
 
 const WINDOW_WIDTH: u32 = 640;
 const WINDOW_HEIGHT: u32 = 480;
@@ -68,6 +67,7 @@ impl Engine {
         self.event_loop = Some(event_loop);
         self.context = Some(context);
 
+        self.renderer.init();
         self.renderer.set_fps(60);
 
         self.initialised = true;
@@ -76,14 +76,6 @@ impl Engine {
 
     pub fn run(mut self) {
         let context = self.context.take().unwrap();
-
-        // Initialise renderer
-        self.renderer.init();
-
-        // Build shaders
-        for shader in self.shaders.values_mut() {
-            shader.build();
-        }
 
         println!("[+] Beginning main loop");
 
@@ -140,7 +132,9 @@ impl Engine {
     }
 
     pub fn add_object(&mut self, model: &str, position: Vector3<f32>, scale: Vector3<f32>) {
+        println!("Adding object `{}`", model);
 
+        self.objects.push(Object::new(model, position, scale));
     }
 
     pub fn add_camera(&mut self, name: &str, position: Vector3<f32>) {
