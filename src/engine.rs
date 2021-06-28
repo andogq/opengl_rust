@@ -16,44 +16,43 @@ use cgmath::Vector3;
 
 use glutin::event::{Event, WindowEvent};
 use glutin::event_loop::{ControlFlow, EventLoop};
-use glutin::window::WindowBuilder;
-use glutin::{ContextBuilder};
+use glutin::window::{Window, WindowBuilder};
+use glutin::{ContextBuilder, ContextWrapper, PossiblyCurrent};
+use glutin::platform::run_return::EventLoopExtRunReturn;
 
 const WINDOW_WIDTH: u32 = 640;
 const WINDOW_HEIGHT: u32 = 480;
 
 pub struct Engine {
     shaders: HashMap<String, Shader>,
-    models: Vec<Model>,
+    models: HashMap<String, Model>,
     objects: Vec<Object>,
     cameras: Vec<Camera>,
     renderer: Renderer,
 
-    initialised: bool
+    initialised: bool,
+
+    event_loop: Option<EventLoop<()>>,
+    context: Option<ContextWrapper<PossiblyCurrent, Window>>
 }
 
 impl Engine {
     pub fn new() -> Engine {
         Engine {
             shaders: HashMap::new(),
-            models: Vec::new(),
+            models: HashMap::new(),
             objects: Vec::new(),
             cameras: Vec::new(),
             renderer: Renderer::new(),
 
-            initialised: false
+            initialised: false,
+
+            event_loop: None,
+            context: None
         }
     }
 
     pub fn init(&mut self) {
-        self.renderer.set_fps(60);
-
-        self.initialised = true;
-        println!("Engine finished initialising");
-    }
-
-    pub fn run(mut self) {
-        //! Window creation need to be done here due to borrow problems with event_loop
         // Create event loop
         let event_loop= EventLoop::new();
         // Create the window and event loop
@@ -66,6 +65,18 @@ impl Engine {
         // Load OpenGL function wrapper
         gl::load_with(|s| context.get_proc_address(s));
 
+        self.event_loop = Some(event_loop);
+        self.context = Some(context);
+
+        self.renderer.set_fps(60);
+
+        self.initialised = true;
+        println!("Engine finished initialising");
+    }
+
+    pub fn run(mut self) {
+        let context = self.context.take().unwrap();
+
         // Initialise renderer
         self.renderer.init();
 
@@ -77,7 +88,8 @@ impl Engine {
         println!("[+] Beginning main loop");
 
         // Setup the event loop listener
-        event_loop.run(move |event, _, control_flow| {
+        let handler = self.event_loop.take().unwrap();
+        handler.run(move |event, _, control_flow| {
             // Check what type of event has been called
             match event {
                 Event::LoopDestroyed => return,
@@ -121,8 +133,10 @@ impl Engine {
         self.shaders.entry(String::from(name)).or_insert(Shader::new(name));
     }
 
-    pub fn add_model(&mut self, name: &str, points: &[f32], shader: &str) {
+    pub fn add_model(&mut self, name: &str, points: &[f32], indices: &[u32], shader: &str) {
+        println!("Adding model `{}`", name);
 
+        self.models.entry(String::from(name)).or_insert(Model::new(points, indices, String::from(shader)));
     }
 
     pub fn add_object(&mut self, model: &str, position: Vector3<f32>, scale: Vector3<f32>) {

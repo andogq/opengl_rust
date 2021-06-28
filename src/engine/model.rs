@@ -3,21 +3,25 @@ mod vertex_array;
 use vertex_array::*;
 
 pub struct Model {
-    id: u32,
-    shader: u32,
+    shader: String,
     vertex_array: VertexArray
 }
 
 impl Model {
-    pub fn new(points: &[f32], shader: u32) -> Model {
-        Model {
-            id: 0,
-            shader: 0,
-            vertex_array: VertexArray::new(Vec::new())
-        }
-    }
+    pub fn new(points: &[f32], indices: &[u32], shader: String) -> Model {
+        let mut vertex_array = VertexArray::new(Vec::from([
+            Layout {
+                normalised: gl::FALSE,
+                size: 3
+            }
+        ]));
 
-    pub fn set_points(&mut self) {
-        
+        vertex_array.set_data(points);
+        vertex_array.set_indices(indices);
+
+        Model {
+            shader,
+            vertex_array
+        }
     }
 }

@@ -20,8 +20,6 @@ const WINDOW_HEIGHT: u32 = 480;
 
 const PI : f32 = 3.141592653589793;
 
-const FPS: u32 = 60;
-
 fn main() {
     // Set up the positions
     let positions: [GLfloat; 12] = [
@@ -44,7 +42,7 @@ fn main() {
     engine.init();
 
     engine.add_shader("basic");
-    // engine.add_model("square", &positions, "basic");
+    engine.add_model("square", &positions, &indices, "basic");
     // engine.add_object("square", Vector3::new(0.0, 0.0, 0.0), Vector3::new(100.0, 100.0, 1.0));
 
     // engine.add_camera("main", Vector3::new(0.0, 0.0, 0.0));
@@ -57,10 +55,10 @@ fn main() {
     // program.bind();
 
     // let mut vertex_array = VertexArray::new( Vec::from([
-    //     Layout {
-    //         normalised: gl::FALSE,
-    //         size: 3
-    //     }
+        // Layout {
+        //     normalised: gl::FALSE,
+        //     size: 3
+        // }
     // ]));
 
     // vertex_array.set_data(&positions);
