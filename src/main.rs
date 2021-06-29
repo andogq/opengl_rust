@@ -1,6 +1,6 @@
 use gl::types::*;
 
-use cgmath::{Matrix4, Vector3, ortho, perspective};
+use cgmath::{Matrix4, Vector3, Rad, perspective};
 
 use std::ffi::{CStr};
 
@@ -45,9 +45,9 @@ fn main() {
     engine.add_model("square", &positions, &indices, "basic");
     engine.add_object("square", Vector3::new(0.0, 0.0, 0.0), Vector3::new(100.0, 100.0, 1.0));
 
-    // engine.add_camera("main", Vector3::new(0.0, 0.0, 0.0));
+    engine.add_camera("main", Vector3::new(0.0, 0.0, 0.0), Vector3::new(0.0, 0.0, 0.0), (WINDOW_WIDTH as f32)/(WINDOW_HEIGHT as f32), PI/2.0);
 
-    // engine.render("main");
+    engine.render("main");
 
     engine.run();
     

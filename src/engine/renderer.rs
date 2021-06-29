@@ -1,20 +1,31 @@
 use std::ffi::{CStr};
 use std::time::{Instant, Duration};
 
-pub struct Renderer {
+use cgmath::{Matrix4, SquareMatrix};
+
+use super::object::Object;
+
+pub struct Renderer<'a> {
     initialised: bool,
 
     fps: u32,
-    last_draw: Instant
+    last_draw: Instant,
+
+    vp_matrix: Matrix4<f32>,
+    objects: &'a Vec<Object>
 }
 
-impl Renderer {
-    pub fn new() -> Renderer {
+impl<'a> Renderer<'a> {
+    pub fn new() -> Renderer<'a> {
         Renderer {
             initialised: false,
 
             fps: 60,
-            last_draw: Instant::now()
+            last_draw: Instant::now(),
+
+            // TODO: Should be reference instead
+            vp_matrix: Matrix4::identity(),
+            objects: Vec::new()
         }
     }
 
@@ -37,6 +48,14 @@ impl Renderer {
 
     pub fn set_fps(&mut self, fps: u32) {
         self.fps = fps;
+    }
+
+    pub fn set_vp_matrix(&mut self, vp_matrix: &Matrix4<f32>) {
+        self.vp_matrix = vp_matrix.clone();
+    }
+
+    pub fn set_objects(&mut self) {
+
     }
 
     pub fn render(&self) {

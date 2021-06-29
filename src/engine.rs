@@ -22,12 +22,12 @@ use glutin::{ContextBuilder, ContextWrapper, PossiblyCurrent};
 const WINDOW_WIDTH: u32 = 640;
 const WINDOW_HEIGHT: u32 = 480;
 
-pub struct Engine {
+pub struct Engine<'a> {
     shaders: HashMap<String, Shader>,
     models: HashMap<String, Model>,
     objects: Vec<Object>,
-    cameras: Vec<Camera>,
-    renderer: Renderer,
+    cameras: HashMap<String, Camera>,
+    renderer: Renderer<'a>,
 
     initialised: bool,
 
@@ -35,13 +35,13 @@ pub struct Engine {
     context: Option<ContextWrapper<PossiblyCurrent, Window>>
 }
 
-impl Engine {
-    pub fn new() -> Engine {
+impl<'a> Engine<'a> {
+    pub fn new() -> Engine<'a> {
         Engine {
             shaders: HashMap::new(),
             models: HashMap::new(),
             objects: Vec::new(),
-            cameras: Vec::new(),
+            cameras: HashMap::new(),
             renderer: Renderer::new(),
 
             initialised: false,
@@ -64,9 +64,11 @@ impl Engine {
         // Load OpenGL function wrapper
         gl::load_with(|s| context.get_proc_address(s));
 
+        // Save the event loop and context
         self.event_loop = Some(event_loop);
         self.context = Some(context);
 
+        // Initialise the renderer
         self.renderer.init();
         self.renderer.set_fps(60);
 
@@ -137,11 +139,12 @@ impl Engine {
         self.objects.push(Object::new(model, position, scale));
     }
 
-    pub fn add_camera(&mut self, name: &str, position: Vector3<f32>) {
-
+    pub fn add_camera(&mut self, name: &str, position: Vector3<f32>, rotation: Vector3<f32>, aspect: f32, fov: f32) {
+        self.cameras.entry(String::from(name)).or_insert(Camera::new(position, rotation, aspect, fov));
     }
 
     pub fn render(&mut self, camera: &str) {
-
+        let camera = self.cameras.get(camera).unwrap();
+        self.renderer.set_vp_matrix(&camera.vp_matrix());
     }
 }
