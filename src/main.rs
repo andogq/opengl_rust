@@ -81,14 +81,45 @@ fn main() {
     engine.add_object(cube_model, Vector3::new(0.0, 0.0, 0.0), Vector3::new(100.0, 100.0, 1.0));
     // engine.add_object(square_model, Vector3::new(500.0, 0.0, 0.0), Vector3::new(100.0, 100.0, 1.0));
 
-    let main_camera = engine.add_camera(Vector3::new(500.0, -500.0, -1000.0), Vector3::new(PI/4.0, PI/4.0, 0.0), (WINDOW_WIDTH as f32)/(WINDOW_HEIGHT as f32), PI/2.0);
+    let main_camera = engine.add_camera(Vector3::new(0.0, 0.0, -100.0), Vector3::new(0.0, 0.0, 0.0), (WINDOW_WIDTH as f32)/(WINDOW_HEIGHT as f32), PI/2.0);
 
     unsafe {
         gl::Disable(gl::CULL_FACE);
     }
 
-    window.run(move || {
-        engine.get_camera(main_camera).rotate(0.0, 0.0, 0.0);
+    let step = 10.0;
+    let rstep = 0.01;
+
+    window.run(move |pressed| {
+        let mut x = 0.0;
+        let mut y = 0.0;
+        let mut z = 0.0;
+
+
+        let mut rx = 0.0;
+        let mut ry = 0.0;
+        let mut rz = 0.0;
+
+        for key in pressed.iter() {
+            match key {
+                glutin::event::VirtualKeyCode::A => x += step,
+                glutin::event::VirtualKeyCode::D => x -= step,
+                glutin::event::VirtualKeyCode::C => y += step,
+                glutin::event::VirtualKeyCode::E => y -= step,
+                glutin::event::VirtualKeyCode::W => z += step,
+                glutin::event::VirtualKeyCode::S => z -= step,
+
+
+                glutin::event::VirtualKeyCode::Down => rx += rstep,
+                glutin::event::VirtualKeyCode::Up => rx -= rstep,
+                glutin::event::VirtualKeyCode::Right => ry += rstep,
+                glutin::event::VirtualKeyCode::Left => ry -= rstep,
+                _ => ()
+            }
+        }
+
+        engine.get_camera(main_camera).translate(x, y, z);
+        engine.get_camera(main_camera).rotate(rx, ry, rz);
 
         engine.render(main_camera);
     });
