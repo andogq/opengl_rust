@@ -80,6 +80,6 @@ impl Engine {
     pub fn render(&mut self, camera: &str) {
         let camera = self.cameras.get(camera).unwrap();
 
-        self.renderer.render(&camera.vp_matrix(), &self.objects, &self.models, &self.shaders);
+        self.renderer.render(&camera.vp_matrix(), &self.objects, &self.models, &mut self.shaders);
     }
 }

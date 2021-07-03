@@ -35,22 +35,20 @@ impl Renderer {
         println!("Renderer finished initialising");
     }
 
-    pub fn render(&self, vp_matrix: &Matrix4<f32>, objects: &Vec<Object>, models: &Vec<Model>, shaders: &Vec<Shader>) {
+    pub fn render(&self, vp_matrix: &Matrix4<f32>, objects: &Vec<Object>, models: &Vec<Model>, shaders: &mut Vec<Shader>) {
         // Clear the screen        
         unsafe { gl::Clear(gl::COLOR_BUFFER_BIT) };
 
         for object in objects.iter() {
             let model = &models[object.get_model()];
-            let shader = &shaders[model.get_shader()];
+            let shader = &mut shaders[model.get_shader()];
 
             // Bind the shader
             shader.bind();
             model.get_vertex_array().bind();
-
-            let uniform = shader.get_uniform("u_mvp_matrix");
-
-            let mvp_matrix: [[f32; 4]; 4] = (vp_matrix * object.model_matrix()).into();
-            unsafe { gl::UniformMatrix4fv(uniform, 1, gl::FALSE, mvp_matrix[0].as_ptr()) };
+            
+            let mvp_matrix = vp_matrix * object.model_matrix();
+            shader.set_uniform("u_mvp_matrix", &mvp_matrix);
 
             unsafe { gl::DrawElements(gl::TRIANGLES, 6, gl::UNSIGNED_INT, std::ptr::null()) };
         }

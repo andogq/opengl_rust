@@ -1,5 +1,6 @@
 use std::fs::read_to_string;
 use std::ffi::{CString};
+use std::collections::HashMap;
 
 use cgmath::Matrix4;
 
@@ -7,7 +8,9 @@ mod individual_shader;
 use individual_shader::*;
 
 pub struct Shader {
-    id: u32
+    id: u32,
+
+    uniform_locations: HashMap<String, i32>
 }
 
 impl Shader {
@@ -40,7 +43,8 @@ impl Shader {
         }
 
         Shader {
-            id
+            id,
+            uniform_locations: HashMap::new()
         }
     }
 
@@ -50,21 +54,31 @@ impl Shader {
         };
     }
 
-    pub fn get_uniform(&self, uniform_name: &str) -> i32 {
-        // Bind the CString to a variable so it doesn't go out of scope
-        let uniform_name_cstring = CString::new(uniform_name).expect("Invalid string to be converted to CString (might have null byte)");
+    pub fn get_uniform(&mut self, uniform_name: &str) -> i32 {
+        match self.uniform_locations.get(uniform_name) {
+            Some(uniform) => uniform.clone(),
+            None => {
+                // Bind the CString to a variable so it doesn't go out of scope
+                let uniform_name_cstring = CString::new(uniform_name).expect("Invalid string to be converted to CString (might have null byte)");
+        
+                // Able to use the pointer here because it hasn't been freed, and return the location
+                let uniform = unsafe { gl::GetUniformLocation(self.id, uniform_name_cstring.as_ptr()) };
+        
+                if uniform == -1 {
+                    panic!("Uniform {} doesn't exist", uniform_name);
+                }
 
-        // Able to use the pointer here because it hasn't been freed, and return the location
-        let location = unsafe { gl::GetUniformLocation(self.id, uniform_name_cstring.as_ptr()) };
-
-        if location == -1 {
-            panic!("Uniform {} doesn't exist", uniform_name);
+                self.uniform_locations.insert(String::from(uniform_name), uniform);
+        
+                uniform
+            }
         }
-
-        location
     }
 
-    pub fn set_uniform(&self, uniform_name: &str, matrix: &Matrix4<f32>) {
+    pub fn set_uniform(&mut self, uniform_name: &str, matrix: &Matrix4<f32>) {
+        let uniform = self.get_uniform(uniform_name);
+        let raw_matrix: [[f32; 4]; 4] = matrix.clone().into();
 
+        unsafe { gl::UniformMatrix4fv(uniform, 1, gl::FALSE, raw_matrix[0].as_ptr()) };
     }
 }
