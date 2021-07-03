@@ -1,7 +1,8 @@
+use glutin::event::{Event, WindowEvent};
 use glutin::platform::run_return::EventLoopExtRunReturn;
 use glutin::window::WindowBuilder;
 use glutin::ContextBuilder;
-use glutin::event_loop::EventLoop;
+use glutin::event_loop::{ControlFlow, EventLoop};
 
 pub struct Window {
     event_loop: Option<EventLoop<()>>,
@@ -28,14 +29,33 @@ impl Window {
     }
 
     pub fn run<F>(self, mut callback: F) where 
-        F: FnMut() -> () {
-        let mut event_loop = self.event_loop.unwrap();
+        F: 'static + FnMut() -> () {
+        let event_loop = self.event_loop.unwrap();
         let context = self.context.unwrap();
 
-        event_loop.run_return(|event, _, control_flow| {
-            callback();
+        event_loop.run(move |event, _, control_flow| {
+            match event {
+                Event::LoopDestroyed => return,
+                Event::WindowEvent { event, .. } => match event {
+                    WindowEvent::CloseRequested => {
+                        *control_flow = ControlFlow::Exit;
+                        println!("WindowEvent::CloseRequested");
+                    },
+                    _ => ()
+                },
+                Event::RedrawRequested(_) => {
+                    callback();
+                    context.swap_buffers().unwrap();
+                },
+                _ => ()
+            };
 
-            context.swap_buffers().unwrap();
+            match *control_flow {
+                ControlFlow::Exit => (),
+                _ => {
+                    context.window().request_redraw();
+                }
+            };
         });
     }
 }

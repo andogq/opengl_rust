@@ -51,11 +51,12 @@ fn main() {
         let square_model = engine.add_model(&positions, &indices, basic_shader);
 
         engine.add_object(square_model, Vector3::new(0.0, 0.0, 0.0), Vector3::new(100.0, 100.0, 1.0));
+        engine.add_object(square_model, Vector3::new(500.0, 0.0, 0.0), Vector3::new(100.0, 100.0, 1.0));
     
-        engine.add_camera("main", Vector3::new(0.0, 0.0, -100.0), Vector3::new(0.0, 0.0, 0.0), (WINDOW_WIDTH as f32)/(WINDOW_HEIGHT as f32), PI/2.0);
+        engine.add_camera("main", Vector3::new(0.0, 0.0, -1000.0), Vector3::new(0.0, 0.0, 0.0), (WINDOW_WIDTH as f32)/(WINDOW_HEIGHT as f32), PI/2.0);
     }
 
-    window.run(|| {
+    window.run(move || {
         engine.render("main");
     });
     
@@ -79,17 +80,6 @@ fn main() {
     let mut camera_rotation = Vector3::new(0.0, 0.0, 0.0);
     
     // let u_mvp_matrix = program.get_uniform( "u_mvp_matrix");
-
-    // let u_color = program.get_uniform("u_color");
-
-    let mut r = 0.0;
-    let mut b = 1.0;
-    let mut g = 0.0;
-
-    let mut dr = 0.001;
-    let mut dg = -0.001;
-    let mut db = 0.0005;
-    
 
     let mut last_draw: time::Instant = time::Instant::now();
 
@@ -123,17 +113,6 @@ fn main() {
     //             unsafe { gl::Clear(gl::COLOR_BUFFER_BIT) };
 
     //             // program.bind();
-
-    //             r += dr;
-    //             g += dg;
-    //             b += db;
-
-    //             if r <= 0.0 || r >= 1.0 { dr *= -1.0; }
-    //             if g <= 0.0 || g >= 1.0 { dg *= -1.0; }
-    //             if b <= 0.0 || b >= 1.0 { db *= -1.0; }
-
-    //             // camera_rotation.x += PI/1000.0;
-    //             // camera_rotation.y += PI/1000.0;
 
     //             // unsafe { gl::Uniform4f(u_color, r, g, b, 1.0) };
 
