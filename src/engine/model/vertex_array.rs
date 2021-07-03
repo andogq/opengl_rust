@@ -12,7 +12,9 @@ pub struct VertexArray {
 
     vertex_array: u32,
     vertex_buffer: u32,
-    index_buffer: u32
+    index_buffer: u32,
+
+    index_length: usize
 }
 
 impl VertexArray {
@@ -34,7 +36,9 @@ impl VertexArray {
 
             vertex_array,
             vertex_buffer,
-            index_buffer
+            index_buffer,
+            
+            index_length: 0
         };
 
         let data_type = gl::FLOAT;
@@ -59,7 +63,13 @@ impl VertexArray {
 
     pub fn set_indices(&mut self, indices: &[u32]) {
         self.bind();
+
+        self.index_length = indices.len();
         unsafe { gl::BufferData(gl::ELEMENT_ARRAY_BUFFER, std::mem::size_of_val(indices) as isize, indices.as_ptr() as *const c_void, gl::STATIC_DRAW) };
+    }
+
+    pub fn get_index_length(&self) -> usize {
+        self.index_length
     }
 
     pub fn bind(&self) {
