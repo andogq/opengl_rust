@@ -64,7 +64,7 @@ impl Engine {
         println!("Adding object");
 
         let object = Object::new(model, position, scale);
-        self.models[model].add_object(object)
+        self.models[model].add_object(object);
     }
 
     pub fn add_camera(&mut self, position: Vector3<f32>, rotation: Vector3<f32>, aspect: f32, fov: f32) -> usize {
@@ -73,6 +73,10 @@ impl Engine {
         self.cameras.push(Camera::new(position, rotation, aspect, fov));
 
         index
+    }
+
+    pub fn get_camera(&mut self, camera_id: usize) -> &mut Camera {
+        &mut self.cameras[camera_id]
     }
 
     pub fn render(&mut self, camera: usize) {

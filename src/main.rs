@@ -88,6 +88,8 @@ fn main() {
     }
 
     window.run(move || {
+        engine.get_camera(main_camera).rotate(0.0, 0.0, 0.0);
+
         engine.render(main_camera);
     });
 }

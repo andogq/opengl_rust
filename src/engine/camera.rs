@@ -22,4 +22,16 @@ impl Camera {
         let view = Matrix4::from_angle_x(Rad(self.rotation.x)) * Matrix4::from_angle_y(Rad(self.rotation.y)) * Matrix4::from_angle_z(Rad(self.rotation.z)) * Matrix4::from_translation(self.position);
         projection * view
     }
+
+    pub fn translate(&mut self, x: f32, y: f32, z: f32) {
+        self.position.x += x;
+        self.position.y += y;
+        self.position.z += z;
+    }
+
+    pub fn rotate(&mut self, x: f32, y: f32, z: f32) {
+        self.rotation.x += x;
+        self.rotation.y += y;
+        self.rotation.z += z;
+    }
 }
