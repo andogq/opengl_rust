@@ -18,8 +18,8 @@ impl Shader {
         let path = format!("./res/shaders/{}", name);
 
         // Load shaders from their respective files
-        let vertex_shader_source = read_to_string(format!("{}/vertex.glsl", path)).expect("Problem reading shader");
-        let fragment_shader_source = read_to_string(format!("{}/fragment.glsl", path)).expect("Problem reading shader");
+        let vertex_shader_source = read_to_string(format!("{}.vert", path)).expect("Problem reading shader");
+        let fragment_shader_source = read_to_string(format!("{}.frag", path)).expect("Problem reading shader");
 
         let vertex_shader = IndividualShader::new(ShaderType::Vertex, &vertex_shader_source);
         let fragment_shader = IndividualShader::new(ShaderType::Fragment, &fragment_shader_source);
