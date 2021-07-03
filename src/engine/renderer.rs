@@ -1,5 +1,4 @@
 use std::ffi::{CStr};
-use std::time::{Instant, Duration};
 
 use cgmath::{Matrix4};
 

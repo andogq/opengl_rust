@@ -1,10 +1,6 @@
 use gl::types::*;
 
-use cgmath::{Matrix4, Vector3, Rad, perspective};
-
-use std::ffi::{CStr};
-
-use std::time;
+use cgmath::Vector3;
 
 mod window;
 use window::Window;
@@ -40,24 +36,22 @@ fn main() {
     /*
         NEW MAIN
     */
-    let mut window = Window::new();
+    let window = Window::new();
     
     let mut engine = Engine::new();
 
-    {
-        engine.init();
-    
-        let basic_shader = engine.add_shader("basic");
-        let square_model = engine.add_model(&positions, &indices, basic_shader);
+    engine.init();
 
-        engine.add_object(square_model, Vector3::new(0.0, 0.0, 0.0), Vector3::new(100.0, 100.0, 1.0));
-        engine.add_object(square_model, Vector3::new(500.0, 0.0, 0.0), Vector3::new(100.0, 100.0, 1.0));
-    
-        engine.add_camera("main", Vector3::new(0.0, 0.0, -1000.0), Vector3::new(0.0, 0.0, 0.0), (WINDOW_WIDTH as f32)/(WINDOW_HEIGHT as f32), PI/2.0);
-    }
+    let basic_shader = engine.add_shader("basic");
+    let square_model = engine.add_model(&positions, &indices, basic_shader);
+
+    engine.add_object(square_model, Vector3::new(0.0, 0.0, 0.0), Vector3::new(100.0, 100.0, 1.0));
+    engine.add_object(square_model, Vector3::new(500.0, 0.0, 0.0), Vector3::new(100.0, 100.0, 1.0));
+
+    let main_camera = engine.add_camera(Vector3::new(0.0, 0.0, -1000.0), Vector3::new(0.0, 0.0, 0.0), (WINDOW_WIDTH as f32)/(WINDOW_HEIGHT as f32), PI/2.0);
 
     window.run(move || {
-        engine.render("main");
+        engine.render(main_camera);
     });
     
     // let program = Program::new("basic");
@@ -74,14 +68,14 @@ fn main() {
     // vertex_array.set_indices(&indices);
     
     // let projection = ortho(-(WINDOW_WIDTH as f32)/2.0, (WINDOW_WIDTH as f32)/2.0, -(WINDOW_HEIGHT as f32)/2.0, (WINDOW_HEIGHT as f32)/2.0, -10000.0, 10000.0);
-    let projection = perspective(cgmath::Rad(50.0/180.0*PI), (WINDOW_WIDTH as f32)/(WINDOW_HEIGHT as f32), 0.1, 10000.0);
-    let model = Matrix4::from_scale(1.0);
-    let mut camera_position = Vector3::new(0.0, 0.0, -1.0);
-    let mut camera_rotation = Vector3::new(0.0, 0.0, 0.0);
+    // let projection = perspective(cgmath::Rad(50.0/180.0*PI), (WINDOW_WIDTH as f32)/(WINDOW_HEIGHT as f32), 0.1, 10000.0);
+    // let model = Matrix4::from_scale(1.0);
+    // let mut camera_position = Vector3::new(0.0, 0.0, -1.0);
+    // let mut camera_rotation = Vector3::new(0.0, 0.0, 0.0);
     
     // let u_mvp_matrix = program.get_uniform( "u_mvp_matrix");
 
-    let mut last_draw: time::Instant = time::Instant::now();
+    // let mut last_draw: time::Instant = time::Instant::now();
 
     // Run the event loop
     // el.run(move |event, _, control_flow| {

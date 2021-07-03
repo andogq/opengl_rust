@@ -10,18 +10,13 @@ use object::Object;
 use camera::Camera;
 use renderer::Renderer;
 
-use std::collections::HashMap;
-
 use cgmath::Vector3;
-
-const WINDOW_WIDTH: u32 = 640;
-const WINDOW_HEIGHT: u32 = 480;
 
 pub struct Engine {
     shaders: Vec<Shader>,
     models: Vec<Model>,
     objects: Vec<Object>,
-    cameras: HashMap<String, Camera>,
+    cameras: Vec<Camera>,
     renderer: Renderer,
 
     initialised: bool
@@ -33,7 +28,7 @@ impl Engine {
             shaders: Vec::new(),
             models: Vec::new(),
             objects: Vec::new(),
-            cameras: HashMap::new(),
+            cameras: Vec::new(),
             renderer: Renderer::new(),
 
             initialised: false
@@ -73,12 +68,16 @@ impl Engine {
         self.objects.push(Object::new(model, position, scale));
     }
 
-    pub fn add_camera(&mut self, name: &str, position: Vector3<f32>, rotation: Vector3<f32>, aspect: f32, fov: f32) {
-        self.cameras.entry(String::from(name)).or_insert(Camera::new(position, rotation, aspect, fov));
+    pub fn add_camera(&mut self, position: Vector3<f32>, rotation: Vector3<f32>, aspect: f32, fov: f32) -> usize {
+        let index = self.cameras.len();
+
+        self.cameras.push(Camera::new(position, rotation, aspect, fov));
+
+        index
     }
 
-    pub fn render(&mut self, camera: &str) {
-        let camera = self.cameras.get(camera).unwrap();
+    pub fn render(&mut self, camera: usize) {
+        let camera = &self.cameras[camera];
 
         self.renderer.render(&camera.vp_matrix(), &self.objects, &self.models, &mut self.shaders);
     }
