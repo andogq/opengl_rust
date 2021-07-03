@@ -40,7 +40,7 @@ fn main() {
     /*
         NEW MAIN
     */
-    let window = Window::new();
+    let mut window = Window::new();
     
     let mut engine = Engine::new();
 

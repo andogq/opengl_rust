@@ -43,7 +43,6 @@ impl Engine {
     pub fn init(&mut self) {
         // Initialise the renderer
         self.renderer.init();
-        self.renderer.set_fps(60);
 
         self.initialised = true;
         println!("Engine finished initialising");

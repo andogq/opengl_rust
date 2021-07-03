@@ -9,18 +9,12 @@ use super::shader::Shader;
 
 pub struct Renderer {
     initialised: bool,
-
-    fps: u32,
-    last_draw: Instant
 }
 
 impl Renderer {
     pub fn new() -> Renderer {
         Renderer {
-            initialised: false,
-
-            fps: 60,
-            last_draw: Instant::now()
+            initialised: false
         }
     }
 
@@ -39,10 +33,6 @@ impl Renderer {
         self.initialised = true;
         check_errors();
         println!("Renderer finished initialising");
-    }
-
-    pub fn set_fps(&mut self, fps: u32) {
-        self.fps = fps;
     }
 
     pub fn render(&self, vp_matrix: &Matrix4<f32>, objects: &Vec<Object>, models: &Vec<Model>, shaders: &Vec<Shader>) {
@@ -66,13 +56,6 @@ impl Renderer {
         }
 
         check_errors();
-    }
-
-    pub fn ready_to_render(&self) -> (bool, Instant) {
-        // Calculate when next frame should be drawn, and trigger a draw call or wait
-        let next_draw = self.last_draw + Duration::from_millis(1000 / self.fps as u64);
-        
-        return (next_draw <= Instant::now(), next_draw);
     }
 }
 

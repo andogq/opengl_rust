@@ -1,8 +1,11 @@
 use glutin::event::{Event, WindowEvent};
-use glutin::platform::run_return::EventLoopExtRunReturn;
 use glutin::window::WindowBuilder;
 use glutin::ContextBuilder;
 use glutin::event_loop::{ControlFlow, EventLoop};
+
+use std::time;
+
+const FPS: u32 = 60;
 
 pub struct Window {
     event_loop: Option<EventLoop<()>>,
@@ -33,19 +36,20 @@ impl Window {
         let event_loop = self.event_loop.unwrap();
         let context = self.context.unwrap();
 
+        let mut last_draw: time::Instant = time::Instant::now();
+
         event_loop.run(move |event, _, control_flow| {
             match event {
                 Event::LoopDestroyed => return,
                 Event::WindowEvent { event, .. } => match event {
-                    WindowEvent::CloseRequested => {
-                        *control_flow = ControlFlow::Exit;
-                        println!("WindowEvent::CloseRequested");
-                    },
+                    WindowEvent::CloseRequested => *control_flow = ControlFlow::Exit,
                     _ => ()
                 },
                 Event::RedrawRequested(_) => {
                     callback();
                     context.swap_buffers().unwrap();
+
+                    last_draw = time::Instant::now();
                 },
                 _ => ()
             };
@@ -53,7 +57,10 @@ impl Window {
             match *control_flow {
                 ControlFlow::Exit => (),
                 _ => {
-                    context.window().request_redraw();
+                    let next_draw = last_draw + time::Duration::from_millis(1000 / FPS as u64);
+        
+                    if next_draw <= time::Instant::now() { context.window().request_redraw(); }
+                    else { *control_flow = ControlFlow::WaitUntil(next_draw); }
                 }
             };
         });
