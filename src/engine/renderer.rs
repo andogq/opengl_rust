@@ -48,6 +48,7 @@ impl Renderer {
                 let mvp_matrix = vp_matrix * object.model_matrix();
                 shader.set_uniform("u_mvp_matrix", &mvp_matrix);
     
+                unsafe { gl::PointSize(10.0) };
                 unsafe { gl::DrawElements(gl::TRIANGLES, model.get_vertex_array().get_index_length() as i32, gl::UNSIGNED_INT, std::ptr::null()) };
             }
         }
