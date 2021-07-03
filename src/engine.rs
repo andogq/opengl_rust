@@ -15,7 +15,6 @@ use cgmath::Vector3;
 pub struct Engine {
     shaders: Vec<Shader>,
     models: Vec<Model>,
-    objects: Vec<Object>,
     cameras: Vec<Camera>,
     renderer: Renderer,
 
@@ -27,7 +26,6 @@ impl Engine {
         Engine {
             shaders: Vec::new(),
             models: Vec::new(),
-            objects: Vec::new(),
             cameras: Vec::new(),
             renderer: Renderer::new(),
 
@@ -65,7 +63,8 @@ impl Engine {
     pub fn add_object(&mut self, model: usize, position: Vector3<f32>, scale: Vector3<f32>) {
         println!("Adding object");
 
-        self.objects.push(Object::new(model, position, scale));
+        let object = Object::new(model, position, scale);
+        self.models[model].add_object(object)
     }
 
     pub fn add_camera(&mut self, position: Vector3<f32>, rotation: Vector3<f32>, aspect: f32, fov: f32) -> usize {
@@ -79,6 +78,6 @@ impl Engine {
     pub fn render(&mut self, camera: usize) {
         let camera = &self.cameras[camera];
 
-        self.renderer.render(&camera.vp_matrix(), &self.objects, &self.models, &mut self.shaders);
+        self.renderer.render(&camera.vp_matrix(), &self.models, &mut self.shaders);
     }
 }

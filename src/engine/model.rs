@@ -2,9 +2,13 @@ mod vertex_array;
 
 use vertex_array::{VertexArray, Layout};
 
+use super::object::Object;
+
 pub struct Model {
     shader: usize,
-    vertex_array: VertexArray
+    vertex_array: VertexArray,
+
+    objects: Vec<Object>
 }
 
 impl Model {
@@ -21,7 +25,9 @@ impl Model {
 
         Model {
             shader,
-            vertex_array
+            vertex_array,
+
+            objects: Vec::new()
         }
     }
 
@@ -31,5 +37,13 @@ impl Model {
 
     pub fn get_vertex_array(&self) -> &VertexArray {
         &self.vertex_array
+    }
+
+    pub fn add_object(&mut self, object: Object) {
+        self.objects.push(object);
+    }
+
+    pub fn get_objects(&self) -> &Vec<Object> {
+        &self.objects
     }
 }
