@@ -1,14 +1,14 @@
 mod vertex_array;
 
-use vertex_array::*;
+use vertex_array::{VertexArray, Layout};
 
 pub struct Model {
-    shader: String,
+    shader: usize,
     vertex_array: VertexArray
 }
 
 impl Model {
-    pub fn new(points: &[f32], indices: &[u32], shader: String) -> Model {
+    pub fn new(points: &[f32], indices: &[u32], shader: usize) -> Model {
         let mut vertex_array = VertexArray::new(Vec::from([
             Layout {
                 normalised: gl::FALSE,
@@ -23,5 +23,13 @@ impl Model {
             shader,
             vertex_array
         }
+    }
+
+    pub fn get_shader(&self) -> usize {
+        self.shader
+    }
+
+    pub fn get_vertex_array(&self) -> &VertexArray {
+        &self.vertex_array
     }
 }

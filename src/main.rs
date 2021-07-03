@@ -6,6 +6,9 @@ use std::ffi::{CStr};
 
 use std::time;
 
+mod window;
+use window::Window;
+
 mod engine;
 use engine::Engine;
 
@@ -37,19 +40,24 @@ fn main() {
     /*
         NEW MAIN
     */
+    let window = Window::new();
+    
     let mut engine = Engine::new();
 
-    engine.init();
+    {
+        engine.init();
+    
+        let basic_shader = engine.add_shader("basic");
+        let square_model = engine.add_model(&positions, &indices, basic_shader);
 
-    engine.add_shader("basic");
-    engine.add_model("square", &positions, &indices, "basic");
-    engine.add_object("square", Vector3::new(0.0, 0.0, 0.0), Vector3::new(100.0, 100.0, 1.0));
+        engine.add_object(square_model, Vector3::new(0.0, 0.0, 0.0), Vector3::new(100.0, 100.0, 1.0));
+    
+        engine.add_camera("main", Vector3::new(0.0, 0.0, -100.0), Vector3::new(0.0, 0.0, 0.0), (WINDOW_WIDTH as f32)/(WINDOW_HEIGHT as f32), PI/2.0);
+    }
 
-    engine.add_camera("main", Vector3::new(0.0, 0.0, 0.0), Vector3::new(0.0, 0.0, 0.0), (WINDOW_WIDTH as f32)/(WINDOW_HEIGHT as f32), PI/2.0);
-
-    engine.render("main");
-
-    engine.run();
+    window.run(|| {
+        engine.render("main");
+    });
     
     // let program = Program::new("basic");
     // program.bind();
@@ -131,7 +139,7 @@ fn main() {
 
     //             let view = Matrix4::from_angle_x(cgmath::Rad(camera_rotation.x)) * Matrix4::from_angle_y(cgmath::Rad(camera_rotation.y)) * Matrix4::from_angle_z(cgmath::Rad(camera_rotation.z)) * Matrix4::from_translation(camera_position);
     //             let mvp_matrix: [[f32; 4]; 4] = (projection * view * model).into();
-    //             // unsafe { gl::UniformMatrix4fv(u_mvp_matrix, 1, gl::FALSE, mvp_matrix[0].as_ptr()) };
+    //             unsafe { gl::UniformMatrix4fv(u_mvp_matrix, 1, gl::FALSE, mvp_matrix[0].as_ptr()) };
 
     //             // vertex_array.bind();
 
