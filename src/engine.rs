@@ -41,11 +41,11 @@ impl Engine {
         println!("Engine finished initialising");
     }
 
-    pub fn add_shader(&mut self, name: &str) -> usize {
+    pub fn add_shader(&mut self, name: &str, geometry: bool) -> usize {
         println!("Adding shader `{}`", name);
 
         let index = self.shaders.len();
-        self.shaders.push(Shader::new(name));
+        self.shaders.push(Shader::new(name, geometry));
 
         index
     }

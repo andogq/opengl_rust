@@ -73,13 +73,14 @@ fn main() {
 
     engine.init();
 
-    let basic_shader = engine.add_shader("basic");
-    let square_model = engine.add_model(&positions, &indices, basic_shader);
-
-    let cube_model = engine.add_model(&cube, &cube_indices, basic_shader);
-
+    let lighting_shader = engine.add_shader("lighting", true);
+    let cube_model = engine.add_model(&cube, &cube_indices, lighting_shader);
     engine.add_object(cube_model, Vector3::new(0.0, 0.0, 0.0), Vector3::new(100.0, 100.0, 100.0));
-    engine.add_object(square_model, Vector3::new(0.0, 500.0, -500.0), Vector3::new(1.0, 1.0, 1.0));
+    
+    let red_shader = engine.add_shader("red", false);
+    let red_cube_model = engine.add_model(&cube, &cube_indices, red_shader);
+    // let square_model = engine.add_model(&positions, &indices, red_shader);
+    engine.add_object(red_cube_model, Vector3::new(0.0, 500.0, -500.0), Vector3::new(5.0, 5.0, 5.0));
 
     let main_camera = engine.add_camera(Vector3::new(0.0, 0.0, -100.0), Vector3::new(0.0, 0.0, 0.0), (WINDOW_WIDTH as f32)/(WINDOW_HEIGHT as f32), PI/2.0);
 

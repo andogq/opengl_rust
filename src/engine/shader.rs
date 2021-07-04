@@ -14,36 +14,41 @@ pub struct Shader {
 }
 
 impl Shader {
-    pub fn new(name: &str) -> Shader {
+    pub fn new(name: &str, geometry: bool) -> Shader {
         let path = format!("./res/shaders/{}", name);
+
+        let mut shaders = Vec::new();
 
         // Load shaders from their respective files
         let vertex_shader_source = read_to_string(format!("{}.vert", path)).expect("Problem reading shader");
         let fragment_shader_source = read_to_string(format!("{}.frag", path)).expect("Problem reading shader");
-        let geometry_shader_source = read_to_string(format!("{}.geom", path)).expect("Problem reading shader");
 
         let vertex_shader = IndividualShader::new(ShaderType::Vertex, &vertex_shader_source);
         let fragment_shader = IndividualShader::new(ShaderType::Fragment, &fragment_shader_source);
-        let geometry_shader = IndividualShader::new(ShaderType::Geometry, &geometry_shader_source);
+        shaders.push(vertex_shader);
+        shaders.push(fragment_shader);
+
+        if geometry {
+            let geometry_shader_source = read_to_string(format!("{}.geom", path)).expect("Problem reading shader");
+            let geometry_shader = IndividualShader::new(ShaderType::Geometry, &geometry_shader_source);
+            shaders.push(geometry_shader);
+        }
 
         let id = unsafe { gl::CreateProgram() };
 
-        unsafe {
-            // Attach the shaders
-            gl::AttachShader(id, vertex_shader.id);
-            gl::AttachShader(id, fragment_shader.id);
-            gl::AttachShader(id, geometry_shader.id);
+        // Attach the shaders
+        for shader in shaders.iter() {
+            unsafe { gl::AttachShader(id, shader.id) };
+        }
 
+        unsafe {
             // Link and check the program
             gl::LinkProgram(id);
             gl::ValidateProgram(id);
         }
 
-        unsafe {
-            // Should be done when they go out of scope
-            gl::DeleteShader(vertex_shader.id);
-            gl::DeleteShader(fragment_shader.id);
-            gl::DeleteShader(geometry_shader.id);
+        for shader in shaders.iter() {
+            unsafe { gl::DeleteShader(shader.id) };
         }
 
         Shader {
