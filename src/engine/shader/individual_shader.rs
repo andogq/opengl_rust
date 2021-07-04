@@ -1,4 +1,3 @@
-use std::os::raw::c_char;
 use std::ffi::{CString};
 
 pub enum ShaderType {
@@ -12,7 +11,7 @@ pub struct IndividualShader {
 }
 
 impl IndividualShader {
-    pub fn new(shader_type: ShaderType, source: &String) -> IndividualShader {
+    pub fn new(shader_type: ShaderType, source: &str) -> IndividualShader {
         // Create the shader
         let id = unsafe { gl::CreateShader(match shader_type {
             ShaderType::Vertex => gl::VERTEX_SHADER,
@@ -22,7 +21,7 @@ impl IndividualShader {
 
         // Load the source and compile the shader
         unsafe {
-            gl::ShaderSource(id, 1, &(source.as_ptr() as *const c_char), std::ptr::null());
+            gl::ShaderSource(id, 1, &source.as_ptr().cast(), &(source.len() as i32));
             gl::CompileShader(id);
         };
 

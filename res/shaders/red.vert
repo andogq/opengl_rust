@@ -10,20 +10,3 @@ void main() {
     vec4 vs_position = u_view_matrix * ws_position;
     gl_Position = u_projection_matrix * vs_position;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
