@@ -35,7 +35,9 @@ impl Renderer {
 
     pub fn render(&self, view_matrix: &Matrix4<f32>, projection_matrix: &Matrix4<f32>, models: &Vec<Model>, shaders: &mut Vec<Shader>) {
         // Clear the screen        
-        unsafe { gl::Clear(gl::COLOR_BUFFER_BIT) };
+        unsafe { gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT) };
+        
+        unsafe { gl::Enable(gl::DEPTH_TEST) };
 
         for model in models.iter() {
             let shader = &mut shaders[model.get_shader()];

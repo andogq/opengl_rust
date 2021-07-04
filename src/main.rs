@@ -84,11 +84,6 @@ fn main() {
 
     let main_camera = engine.add_camera(Vector3::new(0.0, 0.0, -100.0), Vector3::new(0.0, 0.0, 0.0), (WINDOW_WIDTH as f32)/(WINDOW_HEIGHT as f32), PI/2.0);
 
-    unsafe {
-        gl::Enable(gl::CULL_FACE);
-        // gl::Disable(gl::BLEND);
-    }
-
     let step = 10.0;
     let rstep = 0.01;
 
