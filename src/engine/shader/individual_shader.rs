@@ -3,7 +3,8 @@ use std::ffi::{CString};
 
 pub enum ShaderType {
     Vertex,
-    Fragment
+    Fragment,
+    Geometry
 }
 
 pub struct IndividualShader {
@@ -13,7 +14,11 @@ pub struct IndividualShader {
 impl IndividualShader {
     pub fn new(shader_type: ShaderType, source: &String) -> IndividualShader {
         // Create the shader
-        let id = unsafe { gl::CreateShader(match shader_type { ShaderType::Vertex => gl::VERTEX_SHADER, ShaderType::Fragment => gl::FRAGMENT_SHADER }) };
+        let id = unsafe { gl::CreateShader(match shader_type {
+            ShaderType::Vertex => gl::VERTEX_SHADER,
+            ShaderType::Fragment => gl::FRAGMENT_SHADER,
+            ShaderType::Geometry => gl::GEOMETRY_SHADER
+        }) };
 
         // Load the source and compile the shader
         unsafe {
@@ -25,7 +30,11 @@ impl IndividualShader {
         let mut compilation_result = 0;
         unsafe { gl::GetShaderiv(id, gl::COMPILE_STATUS, &mut compilation_result) };
         if compilation_result == gl::FALSE as i32 {
-            println!("Problem compiling shader");
+            println!("Problem compiling {} shader", match shader_type {
+                ShaderType::Vertex => "vertex",
+                ShaderType::Fragment => "fragment",
+                ShaderType::Geometry => "geometry"
+            });
 
             // Get the size of the error to create the buffer
             let mut error_length = 0;

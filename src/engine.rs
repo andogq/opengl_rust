@@ -82,6 +82,6 @@ impl Engine {
     pub fn render(&mut self, camera: usize) {
         let camera = &self.cameras[camera];
 
-        self.renderer.render(&camera.vp_matrix(), &self.models, &mut self.shaders);
+        self.renderer.render(&camera.get_view_matrix(), &camera.get_projection_matrix(), &self.models, &mut self.shaders);
     }
 }

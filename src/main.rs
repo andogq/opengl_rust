@@ -40,15 +40,15 @@ fn main() {
     
     let cube_indices = [
         // Top face
-        4, 5, 6,
-        6, 7, 4,
+        7, 6, 5,
+        5, 4, 7,
 
         // Bottom face
         0, 1, 2,
         2, 3, 0,
 
         // Front face
-        0, 1, 4,
+        4, 1, 0,
         4, 5, 1,
 
         // Back face
@@ -56,11 +56,11 @@ fn main() {
         7, 3, 2,
 
         // Left face
-        0, 4, 7,
-        7, 3, 0,
+        7, 4, 0,
+        0, 3, 7,
 
         // Right face
-        1, 2, 5,
+        5, 2, 1,
         2, 5, 6,
     ];
 
@@ -74,17 +74,18 @@ fn main() {
     engine.init();
 
     let basic_shader = engine.add_shader("basic");
-    // let square_model = engine.add_model(&positions, &indices, basic_shader);
+    let square_model = engine.add_model(&positions, &indices, basic_shader);
 
     let cube_model = engine.add_model(&cube, &cube_indices, basic_shader);
 
-    engine.add_object(cube_model, Vector3::new(0.0, 0.0, 0.0), Vector3::new(100.0, 100.0, 1.0));
-    // engine.add_object(square_model, Vector3::new(500.0, 0.0, 0.0), Vector3::new(100.0, 100.0, 1.0));
+    engine.add_object(cube_model, Vector3::new(0.0, 0.0, 0.0), Vector3::new(100.0, 100.0, 100.0));
+    engine.add_object(square_model, Vector3::new(0.0, 500.0, -500.0), Vector3::new(1.0, 1.0, 1.0));
 
     let main_camera = engine.add_camera(Vector3::new(0.0, 0.0, -100.0), Vector3::new(0.0, 0.0, 0.0), (WINDOW_WIDTH as f32)/(WINDOW_HEIGHT as f32), PI/2.0);
 
     unsafe {
-        gl::Disable(gl::CULL_FACE);
+        gl::Enable(gl::CULL_FACE);
+        // gl::Disable(gl::BLEND);
     }
 
     let step = 10.0;

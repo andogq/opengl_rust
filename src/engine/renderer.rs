@@ -26,14 +26,14 @@ impl Renderer {
         };
 
         // Set the clear color
-        unsafe { gl::ClearColor(0.0, 0.0, 0.0, 1.0) };
+        unsafe { gl::ClearColor(1.0, 1.0, 1.0, 1.0) };
 
         self.initialised = true;
         check_errors();
         println!("Renderer finished initialising");
     }
 
-    pub fn render(&self, vp_matrix: &Matrix4<f32>, models: &Vec<Model>, shaders: &mut Vec<Shader>) {
+    pub fn render(&self, view_matrix: &Matrix4<f32>, projection_matrix: &Matrix4<f32>, models: &Vec<Model>, shaders: &mut Vec<Shader>) {
         // Clear the screen        
         unsafe { gl::Clear(gl::COLOR_BUFFER_BIT) };
 
@@ -45,8 +45,9 @@ impl Renderer {
             model.get_vertex_array().bind();
 
             for object in model.get_objects().iter() {
-                let mvp_matrix = vp_matrix * object.model_matrix();
-                shader.set_uniform("u_mvp_matrix", &mvp_matrix);
+                shader.set_uniform("u_model_matrix", &object.model_matrix());
+                shader.set_uniform("u_view_matrix", view_matrix);
+                shader.set_uniform("u_projection_matrix", projection_matrix);
     
                 unsafe { gl::PointSize(10.0) };
                 unsafe { gl::DrawElements(gl::TRIANGLES, model.get_vertex_array().get_index_length() as i32, gl::UNSIGNED_INT, std::ptr::null()) };

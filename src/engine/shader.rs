@@ -20,9 +20,11 @@ impl Shader {
         // Load shaders from their respective files
         let vertex_shader_source = read_to_string(format!("{}.vert", path)).expect("Problem reading shader");
         let fragment_shader_source = read_to_string(format!("{}.frag", path)).expect("Problem reading shader");
+        let geometry_shader_source = read_to_string(format!("{}.geom", path)).expect("Problem reading shader");
 
         let vertex_shader = IndividualShader::new(ShaderType::Vertex, &vertex_shader_source);
         let fragment_shader = IndividualShader::new(ShaderType::Fragment, &fragment_shader_source);
+        let geometry_shader = IndividualShader::new(ShaderType::Geometry, &geometry_shader_source);
 
         let id = unsafe { gl::CreateProgram() };
 
@@ -30,6 +32,7 @@ impl Shader {
             // Attach the shaders
             gl::AttachShader(id, vertex_shader.id);
             gl::AttachShader(id, fragment_shader.id);
+            gl::AttachShader(id, geometry_shader.id);
 
             // Link and check the program
             gl::LinkProgram(id);
@@ -40,6 +43,7 @@ impl Shader {
             // Should be done when they go out of scope
             gl::DeleteShader(vertex_shader.id);
             gl::DeleteShader(fragment_shader.id);
+            gl::DeleteShader(geometry_shader.id);
         }
 
         Shader {
