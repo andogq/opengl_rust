@@ -1,6 +1,6 @@
 use gl::types::*;
 
-use cgmath::Vector3;
+use cgmath::{InnerSpace, Vector3};
 
 mod window;
 use window::Window;
@@ -85,38 +85,33 @@ fn main() {
     let main_camera = engine.add_camera(Vector3::new(0.0, 0.0, -100.0), Vector3::new(0.0, 0.0, 0.0), (WINDOW_WIDTH as f32)/(WINDOW_HEIGHT as f32), PI/2.0);
 
     let step = 10.0;
-    let rstep = 0.01;
+    let rstep = 0.05;
 
     window.run(move |pressed| {
-        let mut x = 0.0;
-        let mut y = 0.0;
-        let mut z = 0.0;
+        let camera = engine.get_camera(main_camera);
+        
+        let pitch = camera.get_rotation().x;
+        let yaw = camera.get_rotation().y;
 
-
-        let mut rx = 0.0;
-        let mut ry = 0.0;
-        let mut rz = 0.0;
+        let xz_length = pitch.cos() * step;
+        let movement: Vector3<f32> = Vector3::new(-xz_length * yaw.sin(), step * pitch.sin(), xz_length * yaw.cos());
 
         for key in pressed.iter() {
             match key {
-                glutin::event::VirtualKeyCode::A => x += step,
-                glutin::event::VirtualKeyCode::D => x -= step,
-                glutin::event::VirtualKeyCode::C => y += step,
-                glutin::event::VirtualKeyCode::E => y -= step,
-                glutin::event::VirtualKeyCode::W => z += step,
-                glutin::event::VirtualKeyCode::S => z -= step,
+                glutin::event::VirtualKeyCode::Left => camera.rotate(0.0, -rstep, 0.0),
+                glutin::event::VirtualKeyCode::Right => camera.rotate(0.0, rstep, 0.0),
+                // glutin::event::VirtualKeyCode::C => y += step,
+                // glutin::event::VirtualKeyCode::E => y -= step,
+                glutin::event::VirtualKeyCode::W => camera.translate(movement),
+                glutin::event::VirtualKeyCode::S => camera.translate(movement * -1.0),
 
-
-                glutin::event::VirtualKeyCode::Down => rx += rstep,
-                glutin::event::VirtualKeyCode::Up => rx -= rstep,
-                glutin::event::VirtualKeyCode::Right => ry += rstep,
-                glutin::event::VirtualKeyCode::Left => ry -= rstep,
+                glutin::event::VirtualKeyCode::Down => camera.rotate(rstep, 0.0, 0.0),
+                glutin::event::VirtualKeyCode::Up => camera.rotate(-rstep, 0.0, 0.0),
+                // glutin::event::VirtualKeyCode::Right => ry += rstep,
+                // glutin::event::VirtualKeyCode::Left => ry -= rstep,
                 _ => ()
             }
         }
-
-        engine.get_camera(main_camera).translate(x, y, z);
-        engine.get_camera(main_camera).rotate(rx, ry, rz);
 
         engine.render(main_camera);
     });

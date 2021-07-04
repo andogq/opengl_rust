@@ -26,10 +26,16 @@ impl Camera {
 
     }
 
-    pub fn translate(&mut self, x: f32, y: f32, z: f32) {
-        self.position.x += x;
-        self.position.y += y;
-        self.position.z += z;
+    pub fn get_position(&self) -> &Vector3<f32> {
+        &self.position
+    }
+
+    pub fn get_rotation(&self) -> &Vector3<f32> {
+        &self.rotation
+    }
+
+    pub fn translate(&mut self, difference: Vector3<f32>) {
+        self.position += difference;
     }
 
     pub fn rotate(&mut self, x: f32, y: f32, z: f32) {
