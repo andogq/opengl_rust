@@ -5,32 +5,36 @@ use cgmath::{Matrix4};
 use super::model::Model;
 use super::shader::Shader;
 
+use crate::logger::{ Logger, Level };
+
 pub struct Renderer {
     initialised: bool,
+    logger: Logger
 }
 
 impl Renderer {
     pub fn new() -> Renderer {
         Renderer {
-            initialised: false
+            initialised: false,
+            logger: Logger::new(Level::Debug)
         }
     }
 
     pub fn init(&mut self) {
+        self.logger.info("Initialising renderer");
         // Assumes OpenGL bindings have been setup
 
         // Get OpenGL version
         unsafe {
             let data = gl::GetString(gl::VERSION);
-            println!("{}", String::from_utf8(CStr::from_ptr(data as *const i8).to_bytes().to_vec()).unwrap());
+            self.logger.debug(&format!("OpenGL Version: {}", String::from_utf8(CStr::from_ptr(data as *const i8).to_bytes().to_vec()).unwrap()));
         };
 
         // Set the clear color
         unsafe { gl::ClearColor(1.0, 1.0, 1.0, 1.0) };
 
         self.initialised = true;
-        check_errors();
-        println!("Renderer finished initialising");
+        self.check_errors();
     }
 
     pub fn render(&self, view_matrix: &Matrix4<f32>, projection_matrix: &Matrix4<f32>, models: &Vec<Model>, shaders: &mut Vec<Shader>) {
@@ -56,15 +60,15 @@ impl Renderer {
             }
         }
 
-        check_errors();
+        self.check_errors();
     }
-}
 
-fn check_errors() {
-    loop {
-        let error = unsafe { gl::GetError() };
-
-        if error != 0 { println!("[!] OpenGL Error: 0x{:x}", error); }
-        else { break; }
+    fn check_errors(&self) {
+        loop {
+            let error = unsafe { gl::GetError() };
+    
+            if error != 0 { self.logger.error(&format!("[!] OpenGL Error: 0x{:x}", error)); }
+            else { break; }
+        }
     }
 }

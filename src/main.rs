@@ -18,33 +18,7 @@ const PI : f32 = 3.141592653589793;
 
 fn main() {
     let mut log = Logger::new(Level::Debug);
-
-    log.debug("test debug message");
-    log.info("test info message");
-    log.warn("test warn message");
-    log.error("test error message");
-
-    log.set_level(Level::Normal);
-
-    log.debug("test debug message");
-    log.info("test info message");
-    log.warn("test warn message");
-    log.error("test error message");
-
-    log.set_level(Level::Quiet);
-
-    log.debug("test debug message");
-    log.info("test info message");
-    log.warn("test warn message");
-    log.error("test error message");
-
-    log.set_level(Level::Mute);
-
-    log.debug("test debug message");
-    log.info("test info message");
-    log.warn("test warn message");
-    log.error("test error message");
-
+    
     // Set up the positions
     let positions: [GLfloat; 12] = [
         -1.0,  1.0,  0.0,

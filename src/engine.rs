@@ -12,13 +12,16 @@ use renderer::Renderer;
 
 use cgmath::Vector3;
 
+use crate::logger::{ Logger, Level };
+
 pub struct Engine {
     shaders: Vec<Shader>,
     models: Vec<Model>,
     cameras: Vec<Camera>,
     renderer: Renderer,
 
-    initialised: bool
+    initialised: bool,
+    logger: Logger
 }
 
 impl Engine {
@@ -29,7 +32,8 @@ impl Engine {
             cameras: Vec::new(),
             renderer: Renderer::new(),
 
-            initialised: false
+            initialised: false,
+            logger: Logger::new(Level::Debug)
         }
     }
 
@@ -38,11 +42,11 @@ impl Engine {
         self.renderer.init();
 
         self.initialised = true;
-        println!("Engine finished initialising");
+        self.logger.info("Engine finished initialising");
     }
 
     pub fn add_shader(&mut self, name: &str, geometry: bool) -> usize {
-        println!("Adding shader `{}`", name);
+        self.logger.info(&format!("Adding shader `{}`", name));
 
         let index = self.shaders.len();
         self.shaders.push(Shader::new(name, geometry));
@@ -51,6 +55,8 @@ impl Engine {
     }
 
     pub fn add_model(&mut self, points: &[f32], indices: &[u32], shader: usize) -> usize {
+        self.logger.info("Adding model");
+
         let model = Model::new(points, indices, shader);
 
         let index = self.models.len();
@@ -61,13 +67,15 @@ impl Engine {
     }
 
     pub fn add_object(&mut self, model: usize, position: Vector3<f32>, scale: Vector3<f32>) {
-        println!("Adding object");
+        self.logger.info("Adding object");
 
         let object = Object::new(model, position, scale);
         self.models[model].add_object(object);
     }
 
     pub fn add_camera(&mut self, position: Vector3<f32>, rotation: Vector3<f32>, aspect: f32, fov: f32) -> usize {
+        self.logger.info("Adding camera");
+        
         let index = self.cameras.len();
 
         self.cameras.push(Camera::new(position, rotation, aspect, fov));

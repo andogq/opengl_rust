@@ -115,7 +115,7 @@ impl Logger {
 
     fn print_time(&self) {
         self.set_color(Color::Cyan);
-        print!("{:010}s", self.start.elapsed().as_secs_f32());
+        print!("{:015}s", self.start.elapsed().as_secs_f32());
         self.clear_color();
     }
 
