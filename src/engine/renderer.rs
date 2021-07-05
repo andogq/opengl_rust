@@ -1,9 +1,11 @@
-use std::ffi::{CStr};
+use std::ffi::{CStr, CString, c_void};
 
 use cgmath::{Matrix4};
 
 use super::model::Model;
 use super::shader::Shader;
+
+use gl::types::*;
 
 use crate::logger::{ Logger, Level };
 
@@ -29,6 +31,9 @@ impl Renderer {
             let data = gl::GetString(gl::VERSION);
             self.logger.debug(&format!("OpenGL Version: {}", String::from_utf8(CStr::from_ptr(data as *const i8).to_bytes().to_vec()).unwrap()));
         };
+        
+        // Use OpenGL debug callback
+        unsafe { gl::DebugMessageCallback(Some(debug_callback), std::ptr::null()) };
 
         // Set the clear color
         unsafe { gl::ClearColor(1.0, 1.0, 1.0, 1.0) };
@@ -71,4 +76,12 @@ impl Renderer {
             else { break; }
         }
     }
+}
+
+extern "system"
+fn debug_callback(source: GLenum, _type: GLenum, id: GLuint, severity: GLenum, length: GLsizei, message: *const GLchar, user_param: *mut c_void) {
+    let message = unsafe { CStr::from_ptr(message) }.to_str().unwrap();
+
+    // TODO: Use loggin module
+    println!("OpenGL Error: {} {} {}", _type, severity, message);
 }
