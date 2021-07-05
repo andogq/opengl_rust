@@ -35,7 +35,6 @@ fn main() {
     
     let red_shader = engine.add_shader("red", false);
     let red_cube_model = engine.add_model(models::cube::new(red_shader));
-    // let square_model = engine.add_model(&positions, &indices, red_shader);
     engine.add_object(red_cube_model, Vector3::new(0.0, 500.0, -500.0), Vector3::new(5.0, 5.0, 5.0));
 
     let main_camera = engine.add_camera(Vector3::new(0.0, 0.0, -100.0), Vector3::new(0.0, 0.0, 0.0), (WINDOW_WIDTH as f32)/(WINDOW_HEIGHT as f32), PI/2.0);

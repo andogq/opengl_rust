@@ -4,9 +4,16 @@ use vertex_array::{VertexArray, Layout};
 
 use super::object::Object;
 
+pub enum RenderMode {
+    Points,
+    Triangles,
+    TriangleStrip
+}
+
 pub struct Model {
     shader: usize,
     vertex_array: VertexArray,
+    render_mode: RenderMode,
 
     objects: Vec<Object>
 }
@@ -26,6 +33,7 @@ impl Model {
         Model {
             shader,
             vertex_array,
+            render_mode: RenderMode::Triangles,
 
             objects: Vec::new()
         }
@@ -45,5 +53,13 @@ impl Model {
 
     pub fn get_objects(&self) -> &Vec<Object> {
         &self.objects
+    }
+    
+    pub fn set_render_mode(&mut self, render_mode: RenderMode) {
+        self.render_mode = render_mode;
+    }
+
+    pub fn get_render_mode(&self) -> &RenderMode {
+        &self.render_mode
     }
 }

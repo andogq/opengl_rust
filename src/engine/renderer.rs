@@ -2,7 +2,7 @@ use std::ffi::{CStr, CString, c_void};
 
 use cgmath::{Matrix4};
 
-use super::model::Model;
+use super::model::{ Model, RenderMode };
 use super::shader::Shader;
 
 use gl::types::*;
@@ -55,13 +55,19 @@ impl Renderer {
             shader.bind();
             model.get_vertex_array().bind();
 
+            let render_mode = match model.get_render_mode() {
+                RenderMode::Points => gl::POINTS,
+                RenderMode::Triangles => gl::TRIANGLES,
+                RenderMode::TriangleStrip => gl::TRIANGLE_STRIP
+            };
+
             for object in model.get_objects().iter() {
                 shader.set_uniform("u_model_matrix", &object.model_matrix());
                 shader.set_uniform("u_view_matrix", view_matrix);
                 shader.set_uniform("u_projection_matrix", projection_matrix);
     
                 unsafe { gl::PointSize(10.0) };
-                unsafe { gl::DrawElements(gl::TRIANGLES, model.get_vertex_array().get_index_length() as i32, gl::UNSIGNED_INT, std::ptr::null()) };
+                unsafe { gl::DrawElements(render_mode, model.get_vertex_array().get_index_length() as i32, gl::UNSIGNED_INT, std::ptr::null()) };
             }
         }
 
