@@ -11,67 +11,18 @@ use engine::Engine;
 mod logger;
 use logger::{ Logger, Level };
 
+mod models;
+
 const WINDOW_WIDTH: u32 = 640;
 const WINDOW_HEIGHT: u32 = 480;
 
 const PI : f32 = 3.141592653589793;
 
 fn main() {
-    let mut log = Logger::new(Level::Debug);
+    let log = Logger::new(Level::Debug);
     
-    // Set up the positions
-    let positions: [GLfloat; 12] = [
-        -1.0,  1.0,  0.0,
-         1.0,  1.0,  0.0,
-         1.0, -1.0,  0.0,
-        -1.0, -1.0,  0.0
-    ];
+    log.info("Starting program");
 
-    let indices: [GLuint; 6] = [
-        0, 1, 2,
-        2, 3, 0
-    ];
-    
-    let cube = [
-        -1.0, -1.0, -1.0, // 0
-         1.0, -1.0, -1.0, // 1
-         1.0, -1.0,  1.0, // 2
-        -1.0, -1.0,  1.0, // 3
-        -1.0,  1.0, -1.0, // 4
-         1.0,  1.0, -1.0, // 5
-         1.0,  1.0,  1.0, // 6
-        -1.0,  1.0,  1.0  // 7
-    ];
-    
-    let cube_indices = [
-        // Top face
-        7, 6, 5,
-        5, 4, 7,
-
-        // Bottom face
-        0, 1, 2,
-        2, 3, 0,
-
-        // Front face
-        4, 1, 0,
-        4, 5, 1,
-
-        // Back face
-        2, 6, 7,
-        7, 3, 2,
-
-        // Left face
-        7, 4, 0,
-        0, 3, 7,
-
-        // Right face
-        5, 2, 1,
-        2, 5, 6,
-    ];
-
-    /*
-        NEW MAIN
-    */
     let window = Window::new();
     
     let mut engine = Engine::new();
@@ -79,11 +30,11 @@ fn main() {
     engine.init();
 
     let lighting_shader = engine.add_shader("lighting", true);
-    let cube_model = engine.add_model(&cube, &cube_indices, lighting_shader);
+    let cube_model = engine.add_model(models::cube::new(lighting_shader));
     engine.add_object(cube_model, Vector3::new(0.0, 0.0, 0.0), Vector3::new(100.0, 100.0, 100.0));
     
     let red_shader = engine.add_shader("red", false);
-    let red_cube_model = engine.add_model(&cube, &cube_indices, red_shader);
+    let red_cube_model = engine.add_model(models::cube::new(red_shader));
     // let square_model = engine.add_model(&positions, &indices, red_shader);
     engine.add_object(red_cube_model, Vector3::new(0.0, 500.0, -500.0), Vector3::new(5.0, 5.0, 5.0));
 

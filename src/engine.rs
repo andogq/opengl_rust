@@ -1,5 +1,5 @@
 mod shader;
-mod model;
+pub mod model;
 mod object;
 mod camera;
 mod renderer;
@@ -54,10 +54,8 @@ impl Engine {
         index
     }
 
-    pub fn add_model(&mut self, points: &[f32], indices: &[u32], shader: usize) -> usize {
+    pub fn add_model(&mut self, model: Model) -> usize {
         self.logger.info("Adding model");
-
-        let model = Model::new(points, indices, shader);
 
         let index = self.models.len();
 
