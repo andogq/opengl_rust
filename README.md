@@ -45,3 +45,6 @@
  - [Optimising normal calculation](https://www.iquilezles.org/www/articles/normals/normals.htm)
  - [Geometry shader example](https://stackoverflow.com/questions/25434419/glsl-custom-no-interpolation-of-triangles-with-vertex-colors/25508724#25508724)
  - [Shader interface block](https://www.khronos.org/opengl/wiki/Interface_Block_(GLSL))
+
+# Screenshot
+![Screenshot](./screenshot.png)
