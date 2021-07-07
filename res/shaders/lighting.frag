@@ -5,8 +5,6 @@ in vec3 diffuse_light;
 in vec3 normal;
 
 void main() {
-    // vec3 light_position = vec3(0.0, 0.0, -1000.0);
-
     // color = vec4(1.0, 0.0, 0.0, 1.0);
     // color = vec4(normalize(light_position - position) * normal * vec3(1.0, 1.0, 1.0) * 50000 / pow(distance(position, light_position), 2), 1.0);
     // color = vec4(normal, 1.0);

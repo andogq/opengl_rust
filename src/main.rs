@@ -38,16 +38,21 @@ fn main() {
     // let red_cube_model = engine.add_model(models::cube::new(red_shader));
     // engine.add_object(red_cube_model, Vector3::new(0.0, 500.0, -500.0), Vector3::new(5.0, 5.0, 5.0));
 
-    let square_model = engine.add_model(models::square::new(
-        &[
-            [[0.0, 1.0, -1.0], [1.0, 1.0, 0.0]],
-            [[0.0, 0.0, 3.0], [1.0, 0.0, 1.0]]
-        ],
-        red_shader
-    ));
-    engine.add_object(square_model, Vector3::new(0.0, 0.0, 0.0), Vector3::new(1.0, 1.0, 1.0));
+    // let square_model = engine.add_model(models::square::new(
+    //     &[
+    //         [[0.0, 1.0, -1.0], [1.0, 1.0, 0.0]],
+    //         [[0.0, 0.0, 3.0], [1.0, 0.0, 1.0]]
+    //     ],
+    //     red_shader
+    // ));
+    // engine.add_object(square_model, Vector3::new(0.0, 0.0, 0.0), Vector3::new(1.0, 1.0, 1.0));
 
-    let main_camera = engine.add_camera(Vector3::new(0.0, 0.0, -5.0), Vector3::new(0.0, 0.0, 0.0), (WINDOW_WIDTH as f32)/(WINDOW_HEIGHT as f32), PI/2.0);
+    let plane = models::plane::Plane::new(100);
+    let plane_model = engine.add_model(plane.to_model(lighting_shader));
+    
+    engine.add_object(plane_model, Vector3::new(0.0, 0.0, 0.0), Vector3::new(1.0, 1.0, 1.0));
+
+    let main_camera = engine.add_camera(Vector3::new(-50.0, -5.0, -50.0), Vector3::new(0.0, 3.0 / 4.0 * PI, 0.0), (WINDOW_WIDTH as f32)/(WINDOW_HEIGHT as f32), PI/2.0);
 
     let step = 0.1;
     let rstep = 0.05;
