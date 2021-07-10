@@ -1,5 +1,5 @@
 use crate::engine::model::Model;
-use rand::random;
+use noise::{OpenSimplex, NoiseFn};
 
 pub struct Plane {
     size: u32,
@@ -13,6 +13,10 @@ impl Plane {
         let num_vertices = (size + 1) * (size + 1);
         let num_faces = size * size;
 
+        let simplex = OpenSimplex::new();
+        let scale = 10.0 as f64;
+        let height = 5.0 as f32;
+
         let mut plane = Plane {
             size,
             normals: (),
@@ -24,7 +28,7 @@ impl Plane {
         for index in 0..num_vertices {
             let vertex = plane.index_to_vertex(index);
             plane.vertices.push(vertex.0 as f32); // x
-            plane.vertices.push(random::<f32>()); // y
+            plane.vertices.push(simplex.get([vertex.0 as f64 / scale, vertex.1 as f64 / scale]) as f32 * height); // y
             plane.vertices.push(vertex.1 as f32); // z
         }
 
