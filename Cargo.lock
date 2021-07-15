@@ -992,6 +992,7 @@ dependencies = [
  "gl",
  "glutin",
  "noise",
+ "rusttype",
 ]
 
 [[package]]

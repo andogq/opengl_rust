@@ -3,6 +3,7 @@ pub mod model;
 mod object;
 mod camera;
 mod renderer;
+pub mod traits;
 
 use shader::Shader;
 use model::Model;
@@ -20,6 +21,8 @@ pub struct Engine {
     cameras: Vec<Camera>,
     renderer: Renderer,
 
+    renderables: Vec<Box<dyn traits::Renderable>>,
+
     initialised: bool,
     logger: Logger
 }
@@ -31,6 +34,8 @@ impl Engine {
             models: Vec::new(),
             cameras: Vec::new(),
             renderer: Renderer::new(),
+
+            renderables: Vec::new(),
 
             initialised: false,
             logger: Logger::new(Level::Debug)
@@ -79,6 +84,10 @@ impl Engine {
         self.cameras.push(Camera::new(position, rotation, aspect, fov));
 
         index
+    }
+
+    pub fn add_renderable(&mut self, renderable: Box<traits::Renderable>) {
+        self.renderables.push(renderable);
     }
 
     pub fn get_camera(&mut self, camera_id: usize) -> &mut Camera {

@@ -1,4 +1,4 @@
-use std::ffi::{CStr, CString, c_void};
+use std::ffi::{CStr, c_void};
 
 use cgmath::{Matrix4};
 

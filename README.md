@@ -48,3 +48,57 @@
 
 # Screenshot
 ![Screenshot](./screenshot.png)
+
+```rs
+
+pub struct Cube {
+   translation: Vector3,
+   rotation: Vector3,
+   scale: Vector3,
+
+   shader: &Shader,
+   vertex_buffer: VertexBuffer,
+   indices: ...
+}
+
+impl WorldPosition for Cube {
+   fn get_translation(&self) -> &Vector3 {
+      &self.translation
+   }
+
+   fn get_rotation(&self) -> &Vector3 {
+      &self.rotation
+   }
+
+   fn get_scale(&self) -> &Vector3 {
+      &self.scale
+   }
+}
+
+impl Movable for Cube {
+   fn translate(&mut self, translation: Vector3) {
+      self.translation += translation;
+   }
+
+   fn rotate(&mut self, rotation: Vector3) {
+      self.rotation += rotation;
+   }
+
+   fn scale(&mut self, scale: Vector3) {
+      self.scale += scale;
+   }
+}
+
+impl Renderable for Cube {
+   fn get_shader(&self) -> &Shader {
+      self.shader
+   }
+
+   fn get_vertex_buffer(&self) -> &VertexBuffer {
+      self.vertex_buffer
+   }
+
+   ...
+}
+
+```

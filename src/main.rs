@@ -6,12 +6,14 @@ mod window;
 use window::Window;
 
 mod engine;
-use engine::Engine;
+use engine::{Engine, traits::WorldPosition};
 
 mod logger;
 use logger::{ Logger, Level };
 
 mod models;
+
+use models::NewSqaure;
 
 const WINDOW_WIDTH: u32 = 640;
 const WINDOW_HEIGHT: u32 = 480;
@@ -28,6 +30,9 @@ fn main() {
     let mut engine = Engine::new();
 
     engine.init();
+
+    let square = NewSqaure::new();
+    engine.add_renderable(square);
 
     let lighting_shader = engine.add_shader("lighting", true);
     let red_shader = engine.add_shader("red", false);
