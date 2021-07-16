@@ -3,6 +3,8 @@ use gl::types::*;
 use cgmath::Vector3;
 
 mod window;
+mod engine;
+
 use window::Window;
 
 const WINDOW_WIDTH: u32 = 640;
