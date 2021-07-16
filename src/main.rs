@@ -19,6 +19,8 @@ fn main() {
     let engine = Engine::new();
     
     window.run(move |pressed| {
+        engine.update();
+        
         for key in pressed.iter() {
             match key {
                 _ => ()

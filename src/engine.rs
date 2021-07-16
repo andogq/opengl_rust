@@ -30,4 +30,10 @@ impl Engine {
             renderer: Renderer::new()
         }
     }
+
+    pub fn update(&self) {
+        if let Some(camera) = &self.active_camera {
+            self.renderer.render(camera, &self.objects, &self.lights);
+        } else { eprintln!("No camera is selected"); }
+    }
 }

@@ -8,7 +8,7 @@ pub struct Camera {
     scale: f32,
     
     model_matrix: Matrix4<f32>,
-    perspective_matrix: Matrix4<f32>
+    projection_matrix: Matrix4<f32>
 }
 
 impl Camera {
@@ -18,7 +18,7 @@ impl Camera {
             rotation: Vector3::new(0.0, 0.0, 0.0),
             scale: 1.0,
             model_matrix: Matrix4::from_scale(1.0),
-            perspective_matrix: perspective(Rad(fov), aspect, near, far)
+            projection_matrix: perspective(Rad(fov), aspect, near, far)
         }
     }
 
@@ -27,8 +27,8 @@ impl Camera {
         self.model_matrix = Matrix4::from_translation(self.translation) * rotation_matrix * Matrix4::from_scale(self.scale);
     }
 
-    fn get_perspective_matrix(&self) -> &Matrix4<f32> {
-        &self.perspective_matrix
+    pub fn get_projection_matrix(&self) -> &Matrix4<f32> {
+        &self.projection_matrix
     }
 }
 
