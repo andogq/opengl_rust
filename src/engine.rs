@@ -3,6 +3,7 @@ mod vertex_array;
 mod shader;
 mod camera;
 mod renderer;
+pub mod models;
 
 use traits::*;
 pub use vertex_array::{ VertexArray, Layout };
