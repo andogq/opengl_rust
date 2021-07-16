@@ -25,7 +25,7 @@ impl Renderer {
         }
     }
 
-    pub fn render(&self, camera: &Camera, objects: &[Box<&dyn Renderable>], lights: &[Box<Light>]) {
+    pub fn render(&self, camera: &Camera, objects: &[Box<&dyn Renderable>], lights: &[Box<dyn Light>]) {
         unsafe {
             gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
             gl::Enable(gl::DEPTH_TEST);
@@ -49,7 +49,7 @@ impl Renderer {
 }
 
 extern "system"
-fn debug_callback(source: GLenum, _type: GLenum, id: GLuint, severity: GLenum, length: GLsizei, message: *const GLchar, user_param: *mut c_void) {
+fn debug_callback(_source: GLenum, _type: GLenum, _id: GLuint, severity: GLenum, _length: GLsizei, message: *const GLchar, _user_param: *mut c_void) {
     let message = unsafe { CStr::from_ptr(message) }.to_str().unwrap();
 
     eprintln!("OpenGL Error: {} {} {}", _type, severity, message);

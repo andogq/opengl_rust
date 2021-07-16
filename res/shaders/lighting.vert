@@ -18,10 +18,10 @@ void main() {
     model_position = position.xyz;
 
     vec3 light_color = vec3(1.0, 1.0, 1.0);
-    float light_intensity = 1000.0;
+    float light_intensity = 100.0;
     light = light_color * light_intensity;
 
-    vec4 ws_light = vec4(50.0, 50.0, 50.0, 0.0);
+    vec4 ws_light = vec4(0.0, 0.0, 0.0, 0.0);
 
     light_distance = distance(ws_position, ws_light);
     vs_light_direction = normalize(((u_view_matrix * ws_light) - vs_position).xyz);
