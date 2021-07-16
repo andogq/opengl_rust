@@ -2,7 +2,7 @@ mod window;
 mod engine;
 
 use window::Window;
-use engine::{ Engine, Camera, models };
+use engine::{Camera, Engine, models};
 
 const WINDOW_WIDTH: u32 = 640;
 const WINDOW_HEIGHT: u32 = 480;
