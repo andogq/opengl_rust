@@ -6,33 +6,33 @@ mod renderer;
 
 use traits::*;
 use vertex_array::VertexArray;
-use shader::Shader;
-use camera::Camera;
+pub use shader::Shader;
+pub use camera::Camera;
 use renderer::Renderer;
 
-pub struct Engine {
+pub struct Engine<'a> {
     objects: Vec<Box<dyn Renderable>>,
-    cameras: Vec<Box<Camera>>,
     lights: Vec<Box<dyn Light>>,
-    shaders: Vec<Box<Shader>>,
-    active_camera: Option<Box<Camera>>,
+    active_camera: Option<&'a Camera>,
     renderer: Renderer
 }
 
-impl Engine {
-    pub fn new() -> Engine {
+impl<'a> Engine<'a> {
+    pub fn new() -> Engine<'a> {
         Engine {
             objects: Vec::new(),
-            cameras: Vec::new(),
             lights: Vec::new(),
-            shaders: Vec::new(),
             active_camera: None,
             renderer: Renderer::new()
         }
     }
 
+    pub fn use_camera(&mut self, camera: &'a Camera) {
+        self.active_camera = Some(camera);
+    }
+
     pub fn update(&self) {
-        if let Some(camera) = &self.active_camera {
+        if let Some(camera) = self.active_camera {
             self.renderer.render(camera, &self.objects, &self.lights);
         } else { eprintln!("No camera is selected"); }
     }

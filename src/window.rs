@@ -1,4 +1,5 @@
 use glutin::event::{Event, VirtualKeyCode, WindowEvent};
+use glutin::platform::run_return::EventLoopExtRunReturn;
 use glutin::window::WindowBuilder;
 use glutin::ContextBuilder;
 use glutin::event_loop::{ControlFlow, EventLoop};
@@ -32,8 +33,8 @@ impl Window {
     }
 
     pub fn run<F>(self, mut callback: F) where 
-        F: 'static + FnMut(&Vec<VirtualKeyCode>) -> () {
-        let event_loop = self.event_loop.unwrap();
+        F: FnMut(&Vec<VirtualKeyCode>) -> () {
+        let mut event_loop = self.event_loop.unwrap();
         let context = self.context.unwrap();
 
         let mut last_draw: time::Instant = time::Instant::now();
@@ -41,7 +42,7 @@ impl Window {
         let mut pressed = Vec::new();
 
 
-        event_loop.run(move |event, _, control_flow| {
+        event_loop.run_return(|event, _, control_flow| {
             match event {
                 Event::LoopDestroyed => (),
                 Event::WindowEvent { event, .. } => match event {
