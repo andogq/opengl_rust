@@ -25,7 +25,7 @@ impl Renderer {
         }
     }
 
-    pub fn render(&self, camera: &Camera, objects: &[Box<&dyn Renderable>], lights: &[Box<dyn Light>]) {
+    pub fn render(&self, camera: &Camera, objects: &[Box<dyn Renderable>], lights: &[Box<dyn Light>]) {
         unsafe {
             gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
             gl::Enable(gl::DEPTH_TEST);

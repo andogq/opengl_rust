@@ -2,12 +2,16 @@ mod window;
 mod engine;
 
 use window::Window;
-use engine::{Camera, Engine, models};
+use engine::{Camera, Engine, models, traits::Renderable};
 
 const WINDOW_WIDTH: u32 = 640;
 const WINDOW_HEIGHT: u32 = 480;
 
 const PI : f32 = 3.141592653589793;
+
+fn test_update(_objects: &mut Vec<Box<dyn Renderable>>) {
+    println!("Update!");
+}
 
 fn main() {
     let window = Window::new();
@@ -21,7 +25,9 @@ fn main() {
     // engine.add_object(&square);
 
     let cube = models::Cube::new();
-    engine.add_object(&cube);
+    engine.add_object(Box::new(cube));
+
+    engine.add_update(&test_update);
     
     window.run(|pressed| {
         engine.update();
