@@ -1,6 +1,7 @@
 mod window;
 mod engine;
 
+use cgmath::Vector3;
 use window::Window;
 use engine::{Camera, Engine, models, traits::Renderable};
 
@@ -9,8 +10,10 @@ const WINDOW_HEIGHT: u32 = 480;
 
 const PI : f32 = 3.141592653589793;
 
-fn test_update(_objects: &mut Vec<Box<dyn Renderable>>) {
-    println!("Update!");
+fn test_update(objects: &mut Vec<Box<dyn Renderable>>) {
+    for object in objects.iter_mut() {
+        object.rotate(Vector3::new(0.01, 0.0, 0.0));
+    }
 }
 
 fn main() {

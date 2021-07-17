@@ -78,6 +78,11 @@ impl Cube {
             shader: Shader::new("lighting", true)
         }
     }
+
+    fn update_model_matrix(&mut self) {
+        let rotation_matrix = Matrix4::from_angle_x(Rad(self.rotation.x)) * Matrix4::from_angle_y(Rad(self.rotation.x)) * Matrix4::from_angle_z(Rad(self.rotation.x));
+        self.model_matrix = Matrix4::from_translation(self.translation) * rotation_matrix * Matrix4::from_scale(self.scale);
+    }
 }
 
 impl traits::WorldPosition for Cube {
@@ -95,6 +100,21 @@ impl traits::WorldPosition for Cube {
 
     fn get_model_matrix(&self) -> &Matrix4<f32> {
         &self.model_matrix
+    }
+
+    fn translate(&mut self, translation: Vector3<f32>) {
+        self.translation += translation;
+        self.update_model_matrix();
+    }
+
+    fn rotate(&mut self, rotation: Vector3<f32>) {
+        self.rotation += rotation;
+        self.update_model_matrix();
+    }
+
+    fn scale(&mut self, scale: f32) {
+        self.scale += scale;
+        self.update_model_matrix();
     }
 }
 

@@ -73,19 +73,8 @@ impl traits::WorldPosition for Square {
     fn get_model_matrix(&self) -> &Matrix4<f32> {
         &self.model_matrix
     }
-}
 
-impl traits::Renderable for Square {
-    fn get_vertex_array(&self) -> &VertexArray {
-        &self.vertex_array
-    }
 
-    fn get_shader(&self) -> &Shader {
-        &self.shader
-    }
-}
-
-impl traits::Movable for Square {
     fn translate(&mut self, translation: Vector3<f32>) {
         self.translation += translation;
         self.update_model_matrix();
@@ -99,5 +88,15 @@ impl traits::Movable for Square {
     fn scale(&mut self, scale: f32) {
         self.scale += scale;
         self.update_model_matrix();
+    }
+}
+
+impl traits::Renderable for Square {
+    fn get_vertex_array(&self) -> &VertexArray {
+        &self.vertex_array
+    }
+
+    fn get_shader(&self) -> &Shader {
+        &self.shader
     }
 }

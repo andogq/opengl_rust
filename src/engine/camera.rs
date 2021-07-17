@@ -1,4 +1,4 @@
-use super::{ WorldPosition, Movable };
+use super::{ WorldPosition };
 
 use cgmath::{ Vector3, Matrix4, Rad, perspective };
 
@@ -32,23 +32,6 @@ impl Camera {
     }
 }
 
-impl Movable for Camera {
-    fn translate(&mut self, translation: Vector3<f32>) {
-        self.translation += translation;
-        self.update_model_matrix();
-    }
-
-    fn rotate(&mut self, rotation: Vector3<f32>) {
-        self.rotation += rotation;
-        self.update_model_matrix();
-    }
-
-    fn scale(&mut self, scale: f32) {
-        self.scale += scale;
-        self.update_model_matrix();
-    }
-}
-
 impl WorldPosition for Camera {
     fn get_translation(&self) -> &Vector3<f32> {
         &self.translation
@@ -64,5 +47,20 @@ impl WorldPosition for Camera {
 
     fn get_model_matrix(&self) -> &Matrix4<f32> {
         &self.model_matrix
+    }
+
+    fn translate(&mut self, translation: Vector3<f32>) {
+        self.translation += translation;
+        self.update_model_matrix();
+    }
+
+    fn rotate(&mut self, rotation: Vector3<f32>) {
+        self.rotation += rotation;
+        self.update_model_matrix();
+    }
+
+    fn scale(&mut self, scale: f32) {
+        self.scale += scale;
+        self.update_model_matrix();
     }
 }
